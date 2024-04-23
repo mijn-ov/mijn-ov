@@ -15,6 +15,10 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
         },
+        colors: {
+            'ov-purple': '#d649ae',
+            'ov-orange': '#f18d1a',
+        }
     },
 
     plugins: [forms],
