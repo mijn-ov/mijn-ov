@@ -17,11 +17,9 @@ class ChatController extends Controller
         // Here you can process the data, for example, save it to a database or perform any other actions
 
 
-
-
         // Prepare the response
         $response = array(
-            'message' => 'ok',
+            'message' => $data->message,
             'data' => null,
         );
         // Encode the response as JSON

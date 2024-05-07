@@ -70,7 +70,10 @@ function submitChat() {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': csrfToken
         },
-        body: JSON.stringify(messages)
+        body: JSON.stringify({
+            message: newMessage,
+            history: messages,
+        })
     })
         .then(response => {
             if (!response.ok) {
