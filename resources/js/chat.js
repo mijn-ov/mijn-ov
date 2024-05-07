@@ -71,7 +71,7 @@ function submitChat() {
             'X-CSRF-TOKEN': csrfToken
         },
         body: JSON.stringify({
-            message: newMessage,
+            message: chatText,
             history: messages,
         })
     })
