@@ -9,8 +9,8 @@ body {
 
 .logo-text {
     font-style: normal;
-    font-weight: bolder;
-    font-size: 40px;
+    /*font-weight: bolder;*/
+    font-size: 25px;
 
     background: linear-gradient(180deg, var(--ov-orange) 0%, var(--ov-magenta) 100%);
     -webkit-background-clip: text;
@@ -28,8 +28,16 @@ body {
     width: 80%;
     background: #FFFFFF;
     border-radius: 5px;
+    border: unset;
+}
 
-    border: none;
+#message-area::-webkit-scrollbar {
+    display: none;
+}
+
+#message-area {
+    ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 nav {
@@ -57,6 +65,37 @@ nav {
     margin-bottom: -12px;
 }
 
+#message-area {
+    display: flex;
+    padding: 10px;
+    flex-direction: column;
+    margin-right: 25px;
+    margin-left: 25px;
+    gap: 5px;
+    max-height: calc(100vh - 200px);
+    overflow: scroll;
+    align-items: center;
+}
+
+.chat-bubble-user {
+    padding: 7px;
+    color: white;
+    text-align: right;
+    background: var(--ov-orange);
+    border-radius: 10px 10px 0px 10px;
+}
+
+.chat-bubble-bot {
+    padding: 7px;
+    color: white;
+    text-align: left;
+    background: var(--ov-magenta);
+    border-radius: 10px 10px 10px 0px;
+}
+
+.d-none {
+    display: none;
+}
 
 :root {
     --ov-orange: #f18d1a;

@@ -18,7 +18,7 @@
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"/>
     <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/css/app.css', 'resources/js/app.js', 'resources/js/bootstrap.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/bootstrap.js'])
 </head>
 <body>
 <div id="app" class="bg-gray-100 min-h-screen">
