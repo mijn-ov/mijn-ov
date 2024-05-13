@@ -97,7 +97,46 @@ nav {
     display: none;
 }
 
+.user-emissions {
+    display: flex;
+    flex-direction: column;
+}
+
+.emissions-circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+
+.emissions-line {
+    width: 7px;
+    height: 65vh;
+}
+
+.circle-top {
+    transform: translateY(2px);
+}
+
+.circle-bottom {
+    transform: translateY(-2px);
+}
+
+.emissions {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.emissions-user {
+    background-color: var(--ov-emissions);
+}
+
+.emissions-ov {
+    background-color: var(--ov-magenta);
+}
+
 :root {
     --ov-orange: #f18d1a;
     --ov-magenta: #CB4793;
+    --ov-emissions: #495FD6;
 }
