@@ -140,3 +140,40 @@ nav {
     --ov-magenta: #CB4793;
     --ov-emissions: #495FD6;
 }
+
+
+.route-partial{
+    width: 80vw;
+    background-color: var(--ov-magenta);
+    height: 60px;
+    position: relative;
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    color: white;
+}
+
+.leg-header{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    transform: translateY(-22px);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--ov-magenta)
+}
+.leg-duration{
+    margin-left: 5px;
+}
+.leg-type{
+
+}
+.station{
+    font-size: 0.8rem;
+    font-weight: lighter;
+}
