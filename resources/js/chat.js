@@ -1,4 +1,6 @@
 window.addEventListener('load', init)
+window.addEventListener('resize', updateTransform);
+
 
 let chatInput;
 let helpText;
@@ -8,6 +10,8 @@ let appSplash;
 let messageArea;
 let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 let messages = [];
+let userBubbles = [];
+let botBubbles = [];
 
 function init() {
     chatInput = document.getElementById('chat-box');
@@ -33,6 +37,8 @@ function createUserBubble(text) {
 
     let elementWidth = chatBubble.offsetWidth;
     chatBubble.style.transform = 'translateX(calc(50vw - 25px - ' + elementWidth / 2 + 'px))';
+
+    userBubbles.push(chatBubble)
 }
 
 function createBotBubble(text) {
@@ -43,6 +49,19 @@ function createBotBubble(text) {
 
     let elementWidth = chatBubble.offsetWidth;
     chatBubble.style.transform = 'translateX(calc(-50vw + 25px + ' + elementWidth / 2 + 'px))';
+
+    botBubbles.push(chatBubble)
+}
+
+function updateTransform() {
+    for (let bubble of userBubbles) {
+        let elementWidth = bubble.offsetWidth;
+        bubble.style.transform = 'translateX(calc(50vw - 25px - ' + elementWidth / 2 + 'px))';
+    }
+    for (let bubble of botBubbles) {
+        let elementWidth = bubble.offsetWidth;
+        bubble.style.transform = 'translateX(calc(-50vw + 25px + ' + elementWidth / 2 + 'px))';
+    }
 }
 
 function submitChat() {
@@ -90,14 +109,44 @@ function submitChat() {
 
 }
 
-function receiveMessage(data) {
+async function receiveMessage(data) {
 
-    createBotBubble(data.message);
+    let jsonResponse = JSON.parse(data.response)
+
+    try {
+        const response = await fetch(`${jsonResponse.url}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Ocp-Apim-Subscription-Key': 'eae2b92d3a49458f80503a5bb6f7df14'
+            }
+        });
+
+
+        if (response.ok) {
+            let array = [];
+            const data = await response.json();
+            for (let stop of data.trips[0].legs[0].stops) {
+                array.push([stop.lng, stop.lat])
+            }
+            console.log(data.trips[0]);
+
+
+        } else {
+            console.error('Fout bij ophalen reisadvies:', response.statusText);
+            console.log({error: "An error occured while generating MijnOV's response"});
+        }
+    } catch (error) {
+        console.error('Er is een fout opgetreden:', error);
+    }
+
+    console.log(jsonResponse)
+
+    createBotBubble(jsonResponse.beschrijving);
 
     let newMessage = {
         agent: 'bot',
-        message: data.message,
-        data: data.data,
+        message: jsonResponse.beschrijving,
+        data: jsonResponse.data,
     };
 
     messages.push(newMessage);

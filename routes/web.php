@@ -15,12 +15,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [ChatController::class, 'viewChat'])->name('chat');
 
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
 
+Route::get('/uitstoot', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
