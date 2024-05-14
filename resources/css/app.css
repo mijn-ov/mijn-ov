@@ -177,3 +177,31 @@ nav {
     font-size: 0.8rem;
     font-weight: lighter;
 }
+
+.btn {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    color: white;
+    background-color: var(--ov-magenta);
+    transition: 0.1s;
+}
+
+.btn:hover {
+    background-color: var(--ov-orange);
+}
+
+.btn-outline {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    color: var(--ov-magenta);
+    outline: var(--ov-magenta) 2px solid;
+    background-color: unset;
+    transition: 0.1s;
+}
+
+.btn-outline:hover {
+    background-color: var(--ov-magenta);
+    color: white;
+}
