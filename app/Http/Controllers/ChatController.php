@@ -510,7 +510,7 @@ zorg dat het start en eind veld ALTIJD een ns afkorting zijn, geen andere afkort
             'messages' => [
                 ['role' => 'user', 'content' => $prompt],
             ],
-            'temperature' => 0.5,
+            'temperature' => 0,
         ]);
 
 
