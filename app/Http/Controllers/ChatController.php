@@ -39,10 +39,10 @@ Om de NS api te gebruiken hebben we de afkorting nodig die de NS aan deze twee l
 Zorg dat je antwoord altijd dit formaat volgt:
 {
 "url": "de nieuwe url",
-"beschrijving": "extra informatie",
+"beschrijving": "reactie als medewerker chatbot",
 }
 
-Als er geen ns station tussen de lijst staat, zoek dan het dichtsbijzijnde station en zet in de beschrijving hoe lang het lopen is vanaf de gevraagde locatie naar het station.
+Zet in de beschrijving een reactie op de vraag van de klant, bijvoorbeeld: "hier is uw route van_ naar _! Heb een fijne reis!"
 
 Dit is hoe de standaard URL eruit ziet:
 https://gateway.apiportal.ns.nl/reisinformatie-api/api/v3/trips[&fromStation][&toStation][&viaStation][&originWalk][&originBike][&originCar][&destinationWalk][&destinationBike][&destinationCar][&dateTime][&searchForArrival][&departure][&context][&shorterChange][&addChangeTime][&minimalChangeTime][&viaWaitTime][&originAccessible][&travelAssistance][&nsr][&travelAssistanceTransferTime][&accessibilityEquipment1][&accessibilityEquipment2][&searchForAccessibleTrip][&filterTransportMode][&localTrainsOnly][&excludeHighSpeedTrains][&excludeTrainsWithReservationRequired][&product][&discount][&travelClass][&passing][&travelRequestType][&disabledTransportModalities][&firstMileModality][&lastMileModality][&entireTripModality]
@@ -57,9 +57,9 @@ een voorbeeld van wat hier zou kunnen staan is:
 Als er geen NS station is binnen 20 minuten loopafstand, zet dan "NULL" in het vak.
 
 Hier is de vraag van de klant:'.
-$data->message
+            $data->message
 
-.'Hier is een lijst met NS afkortingen:
+            .'Hier is een lijst met NS afkortingen:
 "
 Ac Abcoude
 Ah Arnhem

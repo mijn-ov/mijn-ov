@@ -29,6 +29,49 @@ function init() {
     })
 }
 
+function createRouteMessage(routeDetailObject) {
+    //div + div header
+    let routePartial = document.createElement('div');
+    routePartial.classList.add('route-partial');
+    let legHeader = document.createElement('div');
+    legHeader.classList.add('leg-header');
+    let transportName = document.createElement('p');
+    transportName.textContent = `${routeDetailObject.product.notes[1][0].shortValue} ● ${routeDetailObject.plannedDurationInMinutes}m`;
+    let transportType = document.createElement('p');
+    transportType.textContent = `${routeDetailObject.product.longCategoryName}`;
+    legHeader.append(transportName);
+    legHeader.append(transportType)
+    routePartial.append(legHeader);
+
+    //Inner div content
+    let leftSideDiv = document.createElement('div');
+    let stationPerron = document.createElement('p');
+    stationPerron.classList.add('station')
+    stationPerron.textContent = `Opstap Spoor: ${routeDetailObject.origin.actualTrack}`;
+    let stationName = document.createElement('p');
+    stationName.textContent = `${routeDetailObject.origin.name}`;
+    leftSideDiv.append(stationPerron)
+    leftSideDiv.append(stationName)
+    routePartial.append(leftSideDiv)
+
+    let arrowImg = document.createElement('img');
+    arrowImg.src = 'img/arrow-right.svg';
+    arrowImg.classList.add('arrowImg');
+    routePartial.append(arrowImg);
+
+    let rightSideDiv = document.createElement('div');
+    let stationPerronA = document.createElement('p');
+    stationPerronA.classList.add('station')
+    stationPerronA.textContent = `Afstap Spoor:${routeDetailObject.destination.actualTrack}`;
+    let stationNameA = document.createElement('p');
+    stationNameA.textContent = `${routeDetailObject.destination.name}`;
+    rightSideDiv.append(stationPerronA)
+    rightSideDiv.append(stationNameA)
+    routePartial.append(rightSideDiv)
+
+    messageArea.append(routePartial);
+}
+
 function createUserBubble(text) {
     let chatBubble = document.createElement('div');
     chatBubble.classList.add('chat-bubble-user');
@@ -120,16 +163,18 @@ async function receiveMessage(data) {
                 'Ocp-Apim-Subscription-Key': 'eae2b92d3a49458f80503a5bb6f7df14'
             }
         });
-
-
         if (response.ok) {
             let array = [];
             const data = await response.json();
             for (let stop of data.trips[0].legs[0].stops) {
                 array.push([stop.lng, stop.lat])
             }
-            console.log(data.trips[0]);
+            console.log(data.trips);
 
+            createBotBubble(jsonResponse.beschrijving);
+            for (let leg of data.trips[0].legs) {
+                createRouteMessage(leg);
+            }
 
         } else {
             console.error('Fout bij ophalen reisadvies:', response.statusText);
@@ -139,9 +184,9 @@ async function receiveMessage(data) {
         console.error('Er is een fout opgetreden:', error);
     }
 
-    console.log(jsonResponse)
+    console.log(jsonResponse.data)
 
-    createBotBubble(jsonResponse.beschrijving);
+
 
     let newMessage = {
         agent: 'bot',
