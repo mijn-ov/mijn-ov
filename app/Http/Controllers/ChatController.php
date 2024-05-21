@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\History;
+use Illuminate\Support\Facades\Auth;
 use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Http\Request;
 use OpenAI\Factory;
@@ -56,10 +58,10 @@ een voorbeeld van wat hier zou kunnen staan is:
 "U gaf aan zandpoort, maar het is sandpoort, dit is voor u verbeterd."
 Als er geen NS station is binnen 20 minuten loopafstand, zet dan "NULL" in het vak.
 
-Hier is de vraag van de klant:'.
+Hier is de vraag van de klant:' .
             $data->message
 
-            .'Hier is een lijst met NS afkortingen:
+            . 'Hier is een lijst met NS afkortingen:
 "
 Ac Abcoude
 Ah Arnhem
@@ -526,5 +528,21 @@ zorg dat het start en eind veld ALTIJD een ns afkorting zijn, geen andere afkort
 
         // Send the response back to the client
         echo $json_response;
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'messages' => 'required|string',
+        ]);
+
+        $history = History::create([
+            'history' => $request->input('messages'),
+            'user_id' => Auth::id(),
+        ]);
+
+        $history->save();
+
+        return response()->json(['status' => 'success']);
     }
 }

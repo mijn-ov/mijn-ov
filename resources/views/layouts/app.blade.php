@@ -54,7 +54,7 @@
                     </svg>
                 </a>
             @else
-                <a href="" class="scale-125">
+                <a href="{{ route('profile') }}" class="scale-125">
                     <svg class="fill-ov-purple hover:fill-ov-orange transition ease-in"
                          xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                          fill="#e8eaed">

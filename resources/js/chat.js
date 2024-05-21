@@ -13,6 +13,12 @@ let messages = [];
 let userBubbles = [];
 let botBubbles = [];
 
+let helpBox;
+let helpBoxArrow;
+let helpBoxArrowIcon;
+let helpBoxOpen = false;
+let firstChat = true;
+
 function init() {
     chatInput = document.getElementById('chat-box');
     helpText = document.getElementById('help-text');
@@ -20,11 +26,23 @@ function init() {
     appSplash = document.getElementById('app-splash');
     messageArea = document.getElementById('message-area');
 
+    helpBox = document.getElementById('help-box');
+    helpBoxArrow = document.getElementById('help-box-arrow')
+    helpBoxArrowIcon = document.getElementById('help-box-arrow-icon')
+
     chatForum.addEventListener('submit', function (e) {
         e.preventDefault();
 
         if (chatInput.value !== '') {
             submitChat();
+        }
+    })
+
+    helpBoxArrow.addEventListener('click', function () {
+        if (!helpBoxOpen) {
+            openHelpBox()
+        } else {
+            closeHelpBox()
         }
     })
 }
@@ -85,6 +103,11 @@ function createUserBubble(text) {
 }
 
 function createBotBubble(text) {
+    if (firstChat) {
+        openHelpBox();
+    }
+    firstChat = false
+
     let chatBubble = document.createElement('div');
     chatBubble.classList.add('chat-bubble-bot');
     chatBubble.innerText = text;
@@ -108,7 +131,11 @@ function updateTransform() {
 }
 
 function submitChat() {
-    helpText.remove()
+
+    if (helpText !== null) {
+        helpText.remove()
+    }
+
     appSplash.remove()
 
     chatText = chatInput.value
@@ -155,6 +182,7 @@ function submitChat() {
 async function receiveMessage(data) {
 
     let jsonResponse = JSON.parse(data.response)
+    let tripsData;
 
     try {
         const response = await fetch(`${jsonResponse.url}`, {
@@ -169,6 +197,9 @@ async function receiveMessage(data) {
             for (let stop of data.trips[0].legs[0].stops) {
                 array.push([stop.lng, stop.lat])
             }
+
+            tripsData = data.trips;
+
             console.log(data.trips);
 
             createBotBubble(jsonResponse.beschrijving);
@@ -184,18 +215,57 @@ async function receiveMessage(data) {
         console.error('Er is een fout opgetreden:', error);
     }
 
-    console.log(jsonResponse.data)
+    console.log(jsonResponse)
 
 
 
     let newMessage = {
         agent: 'bot',
         message: jsonResponse.beschrijving,
-        data: jsonResponse.data,
+        data: tripsData,
     };
 
     messages.push(newMessage);
+
+    uploadMessages(JSON.stringify(messages));
+
     console.log(messages);
 
     messageArea.scrollTop = messageArea.scrollHeight;
+}
+
+function uploadMessages(messages) {
+    fetch('/berichten', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify({ messages: messages }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
+function openHelpBox() {
+    console.log('Help open')
+    helpBoxOpen = true
+
+    helpBox.style.transform = 'translateY(-18px)';
+    helpBoxArrowIcon.style.transform = 'rotateX(0deg)';
+}
+
+function closeHelpBox() {
+    console.log('Help closed')
+
+    helpBoxOpen = false
+
+    helpBox.style.transform = 'translateY(69px)';
+    helpBoxArrowIcon.style.transform = 'rotateX(180deg)';
 }

@@ -12,11 +12,41 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
+     * Display the user's settings menu.
+     */
+    public function view(Request $request): View
+    {
+        return view('profile.view', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
+    public function updateView(Request $request): View
     {
-        return view('profile.edit', [
+        return view('profile.menu-items.update-profile-information-form', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Display the user's password form.
+     */
+    public function updatePassword(Request $request): View
+    {
+        return view('profile.menu-items.update-password-form', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Display the user's deletetion form.
+     */
+    public function deleteView(Request $request): View
+    {
+        return view('profile.menu-items.delete-user-form', [
             'user' => $request->user(),
         ]);
     }
@@ -34,7 +64,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile')->with('status', 'profile-updated');
     }
 
     /**

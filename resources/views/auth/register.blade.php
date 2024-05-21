@@ -2,6 +2,8 @@
 
 @section('content')
     <section class="flex flex-col justify-center content-screen items-center">
+            <h1 class="font-bold text-center text-2xl">Registreren</h1>
+
             <form method="POST" action="{{ route('register') }}" class="md:w-1/2 p-10 w-full">
                 @csrf
 
