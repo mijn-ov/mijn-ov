@@ -47,16 +47,16 @@ function init() {
     })
 }
 
-function createRouteMessage(routeDetailObject) {
+function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation) {
     //div + div header
     let routePartial = document.createElement('div');
     routePartial.classList.add('route-partial');
     let legHeader = document.createElement('div');
     legHeader.classList.add('leg-header');
     let transportName = document.createElement('p');
-    transportName.textContent = `${routeDetailObject.product.notes[1][0].shortValue} ● ${routeDetailObject.plannedDurationInMinutes}m`;
+    transportName.textContent = `${legTransitName} ● ${legDuration}`;
     let transportType = document.createElement('p');
-    transportType.textContent = `${routeDetailObject.product.longCategoryName}`;
+    transportType.textContent = `${legCategory}`;
     legHeader.append(transportName);
     legHeader.append(transportType)
     routePartial.append(legHeader);
@@ -65,9 +65,9 @@ function createRouteMessage(routeDetailObject) {
     let leftSideDiv = document.createElement('div');
     let stationPerron = document.createElement('p');
     stationPerron.classList.add('station')
-    stationPerron.textContent = `Opstap Spoor: ${routeDetailObject.origin.actualTrack}`;
+    stationPerron.textContent = `Opstap Spoor: ${originTrack}`;
     let stationName = document.createElement('p');
-    stationName.textContent = `${routeDetailObject.origin.name}`;
+    stationName.textContent = `${originStation}`;
     leftSideDiv.append(stationPerron)
     leftSideDiv.append(stationName)
     routePartial.append(leftSideDiv)
@@ -80,14 +80,33 @@ function createRouteMessage(routeDetailObject) {
     let rightSideDiv = document.createElement('div');
     let stationPerronA = document.createElement('p');
     stationPerronA.classList.add('station')
-    stationPerronA.textContent = `Afstap Spoor:${routeDetailObject.destination.actualTrack}`;
+    stationPerronA.textContent = `Afstap Spoor:${destinationTrack}`;
     let stationNameA = document.createElement('p');
-    stationNameA.textContent = `${routeDetailObject.destination.name}`;
+    stationNameA.textContent = `${destinationStation}`;
     rightSideDiv.append(stationPerronA)
     rightSideDiv.append(stationNameA)
     routePartial.append(rightSideDiv)
 
     messageArea.append(routePartial);
+}
+
+function createWalkBubble(walkInstructionsText, distance, legDuration) {
+    let routePartial = document.createElement('div');
+    routePartial.classList.add('route-partial');
+    let walkInstructions = document.createElement('p');
+    walkInstructions.textContent = walkInstructionsText;
+    routePartial.append(walkInstructions)
+    let legHeader = document.createElement('div');
+    legHeader.classList.add('leg-header');
+    let transportName = document.createElement('p');
+    transportName.textContent = `${distance} ● ${legDuration}`;
+    let transportType = document.createElement('p');
+    transportType.textContent = `Lopen`;
+    legHeader.append(transportName);
+    legHeader.append(transportType);
+    routePartial.append(legHeader);
+
+    messageArea.append(routePartial)
 }
 
 function createUserBubble(text) {
@@ -180,58 +199,55 @@ function submitChat() {
 }
 
 async function receiveMessage(data) {
-
-    let jsonResponse = JSON.parse(data.response)
-    let tripsData;
+    let jsonResponse = JSON.parse(data.response);
 
     try {
-        const response = await fetch(`${jsonResponse.url}`, {
-            headers: {
-                'Accept': 'application/json',
-                'Ocp-Apim-Subscription-Key': 'eae2b92d3a49458f80503a5bb6f7df14'
-            }
-        });
-        if (response.ok) {
-            let array = [];
-            const data = await response.json();
-            for (let stop of data.trips[0].legs[0].stops) {
-                array.push([stop.lng, stop.lat])
-            }
+        const apiKey = 'AIzaSyB_wjTbbUkgfAqITFURl3_bD7EaaqHRLbY'; // Replace with your Google API Key
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}`;
 
-            tripsData = data.trips;
-
-            console.log(data.trips);
-
-            createBotBubble(jsonResponse.beschrijving);
-            for (let leg of data.trips[0].legs) {
-                createRouteMessage(leg);
-            }
-
-        } else {
-            console.error('Fout bij ophalen reisadvies:', response.statusText);
-            console.log({error: "An error occured while generating MijnOV's response"});
+        const response = await fetch(proxyUrl + encodeURIComponent(endpoint));
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
+
+
+        const data = await response.json();
+        const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
+
+        if (apiResponse.status !== 'OK') {
+            throw new Error(`API Error: ${apiResponse.status}`);
+        }
+
+        for (let leg of apiResponse.routes[0].legs[0].steps) {
+            if (leg.travel_mode !== "WALKING") {
+                let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
+                let legDuration = leg.duration.text;
+                let legCategory = leg.transit_details.line.vehicle.name;
+                let originTrack = leg.transit_details.departure_stop.name;
+                let destinationTrack = leg.transit_details.arrival_stop.name;
+
+                console.log(originTrack, destinationTrack);
+                createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
+            } else {
+                createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
+            }
+        }
+
+
+        let newMessage = {
+            agent: 'bot',
+            message: jsonResponse.beschrijving,
+            data: jsonResponse.data,
+        };
+
+        messages.push(newMessage);
+        console.log(messages);
+
+        messageArea.scrollTop = messageArea.scrollHeight;
     } catch (error) {
-        console.error('Er is een fout opgetreden:', error);
+        console.error('Error fetching directions:', error);
     }
-
-    console.log(jsonResponse)
-
-
-
-    let newMessage = {
-        agent: 'bot',
-        message: jsonResponse.beschrijving,
-        data: tripsData,
-    };
-
-    messages.push(newMessage);
-
-    uploadMessages(JSON.stringify(messages));
-
-    console.log(messages);
-
-    messageArea.scrollTop = messageArea.scrollHeight;
 }
 
 function uploadMessages(messages) {
