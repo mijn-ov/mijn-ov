@@ -21,10 +21,15 @@ Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('
 
 Route::get('/uitstoot', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
+Route::post('/berichten', [ChatController::class, 'store']);
+
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profiel', [ProfileController::class, 'view'])->name('profile');
+    Route::get('/profiel/informatie', [ProfileController::class, 'updateView'])->name('profile.update.view');
+    Route::get('/profiel/wachtwoord', [ProfileController::class, 'updatePassword'])->name('profile.password.view');
+    Route::get('/profiel/verwijderen', [ProfileController::class, 'deleteView'])->name('profile.delete.view');
+    Route::patch('/profiel/informatie', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profiel', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';
