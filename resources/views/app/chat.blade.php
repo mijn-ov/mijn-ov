@@ -14,6 +14,17 @@
 
 
         <div id="message-area">
+            <form action="{{ route('favorite.store') }}" method="POST">
+                @csrf
+                <input type="text" id="trip_name" name="trip_name"
+                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"
+                       placeholder="Plaats hier uw titel"
+                       value="nieuw!">
+                <input type="text" id="trip_url" name="trip_url"
+                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"
+                       placeholder="Plaats hier uw URL" value="nieuw">
+                <button type="submit">Submit</button>
+            </form>
         </div>
 
         <div>
