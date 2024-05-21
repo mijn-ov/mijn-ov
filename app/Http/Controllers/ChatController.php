@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\History;
+use Illuminate\Support\Facades\Auth;
 use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Http\Request;
 use OpenAI\Factory;
@@ -50,11 +52,6 @@ Hier is het exacte formaat van de JSON, zorg dat je altijd deze vier velden hebt
    "parameters":"additional parameters you can find"
 }
 
-Dit is een herhaling in het kort van wat je moet doen:
-1. zoek een begin en eindpunt van een reis, zet deze in de JSON.
-2. maak een kort bericht naar de gebruiker, wens hem of haar een fijne reis. Zet deze in het "description" deel van de JSON.
-3. Zoek mogelijke parameters op in het bericht van de gebruiker, zet deze in het "parameter" deel van de JSON.
-
 Hier is het bericht van de gebruiker:' .
             $data->message;
 
@@ -78,5 +75,21 @@ Hier is het bericht van de gebruiker:' .
 
         // Send the response back to the client
         echo $json_response;
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'messages' => 'required|string',
+        ]);
+
+        $history = History::create([
+            'history' => $request->input('messages'),
+            'user_id' => Auth::id(),
+        ]);
+
+        $history->save();
+
+        return response()->json(['status' => 'success']);
     }
 }
