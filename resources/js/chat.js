@@ -65,7 +65,7 @@ function createRouteMessage(legTransitName, legDuration, legCategory, originTrac
     let leftSideDiv = document.createElement('div');
     let stationPerron = document.createElement('p');
     stationPerron.classList.add('station')
-    stationPerron.textContent = `Opstap Spoor: ${originTrack}`;
+    stationPerron.textContent = `Opstap:`;
     let stationName = document.createElement('p');
     stationName.textContent = `${originStation}`;
     leftSideDiv.append(stationPerron)
@@ -80,7 +80,7 @@ function createRouteMessage(legTransitName, legDuration, legCategory, originTrac
     let rightSideDiv = document.createElement('div');
     let stationPerronA = document.createElement('p');
     stationPerronA.classList.add('station')
-    stationPerronA.textContent = `Afstap Spoor:${destinationTrack}`;
+    stationPerronA.textContent = `Afstap:`;
     let stationNameA = document.createElement('p');
     stationNameA.textContent = `${destinationStation}`;
     rightSideDiv.append(stationPerronA)
@@ -202,9 +202,9 @@ async function receiveMessage(data) {
     let jsonResponse = JSON.parse(data.response);
 
     try {
-        const apiKey = 'AIzaSyB_wjTbbUkgfAqITFURl3_bD7EaaqHRLbY'; // Replace with your Google API Key
+        const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY'; // Replace with your Google API Key
         const proxyUrl = 'https://api.allorigins.win/get?url=';
-        const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}`;
+        const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
 
         const response = await fetch(proxyUrl + encodeURIComponent(endpoint));
         if (!response.ok) {
@@ -233,7 +233,9 @@ async function receiveMessage(data) {
                 createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
             }
         }
-
+        document.getElementById("trip_name").value = `${jsonResponse.origin} -> ${jsonResponse.destination}`;
+        document.getElementById("trip_url").value = proxyUrl + encodeURIComponent(endpoint);
+        console.log(document.getElementById('trip_url').value);
 
         let newMessage = {
             agent: 'bot',
@@ -258,7 +260,7 @@ function uploadMessages(messages) {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
         },
-        body: JSON.stringify({ messages: messages }),
+        body: JSON.stringify({messages: messages}),
     })
         .then(response => response.json())
         .then(data => {

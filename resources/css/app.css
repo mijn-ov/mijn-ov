@@ -153,7 +153,9 @@ nav {
 .circle-top {
     transform: translateY(2px);
 }
-
+#trip_name, #trip_url{
+    display: none;
+}
 .circle-bottom {
     transform: translateY(-2px);
 }
@@ -176,7 +178,6 @@ nav {
 .route-partial{
     width: 80vw;
     background-color: var(--ov-magenta);
-    height: 60px;
     position: relative;
     margin: 20px 0;
     display: flex;
