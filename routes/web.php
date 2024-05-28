@@ -20,11 +20,13 @@ Route::get('/', [ChatController::class, 'viewChat'])->name('chat');
 
 Route::get('/favorieten', [FavoritesController::class, 'viewFavorites'])->name('favorites');
 Route::post('/saveFavoriet', [FavoritesController::class, 'store'])->name('favorite.store');
+
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
 
 Route::get('/uitstoot', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
 Route::post('/berichten', [ChatController::class, 'store']);
+Route::post('/berichten-create', [ChatController::class, 'create']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profiel', [ProfileController::class, 'view'])->name('profile');
