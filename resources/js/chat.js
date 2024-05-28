@@ -19,6 +19,9 @@ let helpBoxArrowIcon;
 let helpBoxOpen = false;
 let firstChat = true;
 
+let chatID;
+
+
 function init() {
     chatInput = document.getElementById('chat-box');
     helpText = document.getElementById('help-text');
@@ -48,6 +51,11 @@ function init() {
 }
 
 function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation) {
+    if (firstChat) {
+        openHelpBox();
+    }
+    firstChat = false
+
     //div + div header
     let routePartial = document.createElement('div');
     routePartial.classList.add('route-partial');
@@ -122,10 +130,6 @@ function createUserBubble(text) {
 }
 
 function createBotBubble(text) {
-    if (firstChat) {
-        openHelpBox();
-    }
-    firstChat = false
 
     let chatBubble = document.createElement('div');
     chatBubble.classList.add('chat-bubble-bot');
@@ -149,7 +153,7 @@ function updateTransform() {
     }
 }
 
-function submitChat() {
+async function submitChat() {
 
     if (helpText !== null) {
         helpText.remove()
@@ -166,6 +170,8 @@ function submitChat() {
         agent: 'user',
         message: chatText
     };
+
+    handleChat(newMessage)
 
     messages.push(newMessage);
     console.log(messages);
@@ -195,14 +201,32 @@ function submitChat() {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-
 }
 
+async function handleChat(messsage) {
+    if (firstChat) {
+        try {
+            const response = await createHistory('test');
+            chatID = response.chatID; // Update chatID with the newly created one
+        } catch (error) {
+            console.error('Error creating history:', error);
+            return; // Exit if there's an error creating history
+        }
+    }
+
+    if (chatID) {
+        messsage.history_id = chatID;
+        await uploadMessages(messsage);
+    }
+}
+
+
 async function receiveMessage(data) {
+    console.log(data.response)
     let jsonResponse = JSON.parse(data.response);
 
     try {
-        const apiKey = 'AIzaSyB_wjTbbUkgfAqITFURl3_bD7EaaqHRLbY'; // Replace with your Google API Key
+        const apiKey = '***';
         const proxyUrl = 'https://api.allorigins.win/get?url=';
         const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}`;
 
@@ -211,6 +235,7 @@ async function receiveMessage(data) {
             throw new Error('Network response was not ok');
         }
 
+        createBotBubble(jsonResponse.message)
 
         const data = await response.json();
         const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
@@ -250,24 +275,45 @@ async function receiveMessage(data) {
     }
 }
 
-function uploadMessages(messages) {
-    fetch('/berichten', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        },
-        body: JSON.stringify({ messages: messages }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
+async function createHistory(title) {
+    try {
+        const response = await fetch('/berichten-create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ history: title }),
         });
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating history:', error);
+    }
 }
+
+async function uploadMessages(messages, apidata, id) {
+    try {
+        const response = await fetch('/berichten', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({
+                messages: messages,
+                data: apidata || null,
+                history_id: chatID,
+            }),
+        });
+        const data = await response.json();
+        console.log('Success:', data);
+    } catch (error) {
+        console.error('Error uploading messages:', error);
+    }
+}
+
 
 function openHelpBox() {
     console.log('Help open')
