@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\FavoritesController;
+use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,8 +19,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ChatController::class, 'viewChat'])->name('chat');
 Route::get('/chat/{id}', [ChatController::class, 'loadHistory'])->name('chat.history');
 
-Route::get('/favorieten', [FavoritesController::class, 'viewFavorites'])->name('favorites');
-Route::post('/saveFavoriet', [FavoritesController::class, 'store'])->name('favorite.store');
+
+Route::get('/favorieten', [FavoriteController::class, 'viewFavorites'])->name('favorites');
+Route::post('/saveFavoriet', [FavoriteController::class, 'store'])->name('favorite.store');
 
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
 
