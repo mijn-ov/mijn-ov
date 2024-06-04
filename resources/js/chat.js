@@ -1,3 +1,6 @@
+
+
+
 window.addEventListener('load', init)
 window.addEventListener('resize', updateTransform);
 
@@ -226,7 +229,7 @@ async function receiveMessage(data) {
     let jsonResponse = JSON.parse(data.response);
 
     try {
-        const apiKey = '***';
+        const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
         const proxyUrl = 'https://api.allorigins.win/get?url=';
         const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}`;
 
@@ -243,7 +246,9 @@ async function receiveMessage(data) {
         if (apiResponse.status !== 'OK') {
             throw new Error(`API Error: ${apiResponse.status}`);
         }
-
+        let originPoints = [];
+        let destinationPoints = [];
+        let mapInfoPoints = [];
         for (let leg of apiResponse.routes[0].legs[0].steps) {
             if (leg.travel_mode !== "WALKING") {
                 let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
@@ -251,13 +256,18 @@ async function receiveMessage(data) {
                 let legCategory = leg.transit_details.line.vehicle.name;
                 let originTrack = leg.transit_details.departure_stop.name;
                 let destinationTrack = leg.transit_details.arrival_stop.name;
+                //let originPoint = leg.transit_details.departure_stop.location;
+                //let destinationPoint = leg.transit_details.arrival_stop.location;
+                let mapInfo = leg;
 
-                console.log(originTrack, destinationTrack);
+                // Push origin and destination points to their respective arrays
+                mapInfoPoints.push(mapInfo);
                 createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
             } else {
                 createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
             }
         }
+        localStorage.setItem('mapInfoPoints', JSON.stringify(mapInfoPoints));
 
 
         let newMessage = {
