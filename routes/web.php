@@ -34,6 +34,8 @@ Route::post('/berichten-create', [ChatController::class, 'create']);
 Route::post('/berichten-update/{id}', [ChatController::class, 'update']);
 
 Route::middleware('auth')->group(function () {
+    Route::get('/geschiedenis', [ProfileController::class, 'history'])->name('profile.history');
+
     Route::get('/profiel', [ProfileController::class, 'view'])->name('profile');
     Route::get('/profiel/informatie', [ProfileController::class, 'updateView'])->name('profile.update.view');
     Route::get('/profiel/wachtwoord', [ProfileController::class, 'updatePassword'])->name('profile.password.view');

@@ -91,7 +91,7 @@ Samengevat:
 2. Als er een error is, geef dan een foutmelding en hulp in "message" en een technische uitleg in "error". Laat de andere velden leeg.
 3. Laat een bericht achter in "message"
 4. Kijk of er andere parameters ingevuld kunnen worden.
-5. Geef het gesprek een titel.
+5. Geef het gesprek een passende titel met het start of eindpunt.
 
 Je moet je antwoord in een JSON formaat sturen, ook tijdens een error!
 
@@ -102,7 +102,7 @@ Hier is het exacte formaat van de JSON, zorg dat je altijd deze vier velden hebt
    "message": "your message to the customer",
    "parameters": "additional parameters you can find",
    "error": "The optional error you had while getting an start and endpoint.",
-   "title": "The title of the message",
+   "title": "The title of the conversation, include at least one of the locations.",
 }
 
 Stuur nooit iets zonder dat het in een JSON formaat is!

@@ -8,20 +8,16 @@
         <div id="app-splash" class="flex justify-center items-center flex-col w-full p-5"
              style="transform: translateY(-20px);">
             @if($messages === null)
-            <img class="w-96" alt="logo" src="{{ asset('img/ov-logo.png') }}">
-            @auth()
-                <p class="logo-text">Hoi {{ Auth::user()->name }}!</p>
-            @endauth
+                <img class="w-96" alt="logo" src="{{ asset('img/ov-logo.png') }}">
 
-            <p class="logo-text" id="welcome-text"></p>
+                <p class="logo-text" id="welcome-text"></p>
             @endif
 
             @auth()
                 @if($histories !== null)
-                    <div id="history"
-                         class="flex flex-row gap-4 w-1/2 overflow-scroll no-scroll items-center justify-center">
+                    <div id="history" class="flex flex-row gap-4 w-1/2 justify-center">
                         @foreach($histories as $history)
-                            <a href="{{ route('chat.history', [$history->id]) }}">
+                            <a href="{{ route('chat.history', [$history->id]) }}" class="w-1/2">
                                 <div class="history-button" data-id="{{ $history->id }}">
                                     <p>{{ $history->title }}</p>
                                 </div>
@@ -55,7 +51,9 @@
             </div>
 
             <form id="chatbox" class="rounded bg-gray-100 w-full flex justify-center flex-col gap-3 items-center">
-                <div id="help-box" @if($messages === null) style="transform: translateY(200px);" @else style="transform: translateY(-18px);" @endif class="flex flex-col w-full justify-center items-center">
+                <div id="help-box" @if($messages === null) style="transform: translateY(200px);"
+                     @else style="transform: translateY(-18px);"
+                     @endif class="flex flex-col w-full justify-center items-center">
                     <div id="help-box-arrow">
                         <svg id="help-box-arrow-icon" xmlns="http://www.w3.org/2000/svg" height="24px"
                              viewBox="0 -960 960 960" width="24px" fill="#000000">
