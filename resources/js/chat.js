@@ -24,6 +24,8 @@ let firstChat = true;
 
 let chatID;
 
+let emmisionsButton;
+
 
 function init() {
     chatInput = document.getElementById('chat-box');
@@ -35,6 +37,13 @@ function init() {
     helpBox = document.getElementById('help-box');
     helpBoxArrow = document.getElementById('help-box-arrow')
     helpBoxArrowIcon = document.getElementById('help-box-arrow-icon')
+
+    emmisionsButton = document.getElementById('emmisions-button')
+
+    emmisionsButton.addEventListener('click', function () {
+        console.log(chatID)
+        window.location.href = `/uitstoot/${chatID}`;
+    })
 
     chatForum.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -51,6 +60,42 @@ function init() {
             closeHelpBox()
         }
     })
+
+    if (chatHistoryData) {
+        console.log(chatHistoryData)
+        try {
+
+            chatHistoryData.forEach(history => {
+                try {
+                    const messageObj = JSON.parse(history.message);
+
+                    if (messageObj.agent === 'user') {
+                        createUserBubble(messageObj.message);
+                    } else if (messageObj.agent === 'bot') {
+                        createBotBubble(messageObj.message);
+                    }
+
+                    const dataObj = JSON.parse(history.data);
+                    if (dataObj) {
+                        createRoute(dataObj)
+                    }
+
+                } catch (error) {
+                    console.error('Error parsing message:', error);
+                }
+            });
+
+            openHelpBox()
+            appSplash.remove()
+
+            firstChat = false;
+
+            chatID = chatHistoryData[0].history_id
+            console.log(chatID)
+        } catch (error) {
+            console.error('Error parsing chat history data:', error);
+        }
+    }
 }
 
 function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation) {
@@ -167,11 +212,12 @@ async function submitChat() {
     chatText = chatInput.value
     chatInput.value = '';
 
+
     createUserBubble(chatText);
 
     let newMessage = {
         agent: 'user',
-        message: chatText
+        message: chatText,
     };
 
     handleChat(newMessage)
@@ -209,7 +255,7 @@ async function submitChat() {
 async function handleChat(messsage) {
     if (firstChat) {
         try {
-            const response = await createHistory('test');
+            const response = await createHistory('Gesprek zonder titel');
             chatID = response.chatID; // Update chatID with the newly created one
         } catch (error) {
             console.error('Error creating history:', error);
@@ -218,7 +264,6 @@ async function handleChat(messsage) {
     }
 
     if (chatID) {
-        messsage.history_id = chatID;
         await uploadMessages(messsage);
     }
 }
@@ -239,6 +284,8 @@ async function receiveMessage(data) {
         }
 
         createBotBubble(jsonResponse.message)
+
+        updateHistory(jsonResponse.title)
 
         const data = await response.json();
         const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
@@ -270,11 +317,18 @@ async function receiveMessage(data) {
         localStorage.setItem('mapInfoPoints', JSON.stringify(mapInfoPoints));
 
 
+        createRoute(apiResponse);
+
         let newMessage = {
             agent: 'bot',
-            message: jsonResponse.beschrijving,
-            data: jsonResponse.data,
+            message: jsonResponse.message,
         };
+
+        console.log(newMessage)
+
+        if (chatID) {
+            await uploadMessages(newMessage, JSON.stringify(apiResponse), chatID);
+        }
 
         messages.push(newMessage);
         console.log(messages);
@@ -282,6 +336,23 @@ async function receiveMessage(data) {
         messageArea.scrollTop = messageArea.scrollHeight;
     } catch (error) {
         console.error('Error fetching directions:', error);
+    }
+}
+
+function createRoute(apiResponse) {
+    for (let leg of apiResponse.routes[0].legs[0].steps) {
+        if (leg.travel_mode !== "WALKING") {
+            let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
+            let legDuration = leg.duration.text;
+            let legCategory = leg.transit_details.line.vehicle.name;
+            let originTrack = leg.transit_details.departure_stop.name;
+            let destinationTrack = leg.transit_details.arrival_stop.name;
+
+            console.log(originTrack, destinationTrack);
+            createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
+        } else {
+            createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
+        }
     }
 }
 
@@ -299,6 +370,23 @@ async function createHistory(title) {
         return await response.json();
     } catch (error) {
         console.error('Error creating history:', error);
+    }
+}
+
+async function updateHistory(title) {
+    try {
+        const response = await fetch(`/berichten-update/${chatID}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ title: title }),
+        });
+        await console.log(response.json())
+    } catch (error) {
+        console.error('Error updating history:', error);
     }
 }
 
