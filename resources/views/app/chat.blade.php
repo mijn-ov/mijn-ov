@@ -7,27 +7,50 @@
     <section class="flex flex-col justify-between content-screen">
         <div id="app-splash" class="flex justify-center items-center flex-col w-full p-5"
              style="transform: translateY(-20px);">
+            @if($messages === null)
             <img class="w-96" alt="logo" src="{{ asset('img/ov-logo.png') }}">
             @auth()
                 <p class="logo-text">Hoi {{ Auth::user()->name }}!</p>
             @endauth
 
             <p class="logo-text" id="welcome-text"></p>
+            @endif
+
+            @auth()
+                @if($histories !== null)
+                    <div id="history"
+                         class="flex flex-row gap-4 w-1/2 overflow-scroll no-scroll items-center justify-center">
+                        @foreach($histories as $history)
+                            <a href="{{ route('chat.history', [$history->id]) }}">
+                                <div class="history-button" data-id="{{ $history->id }}">
+                                    <p>{{ $history->title }}</p>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if($messages !== null)
+                    <script>
+                        const chatHistoryData = {!! $messages->toJson() !!};
+                    </script>
+                @endif
+            @endauth
         </div>
 
 
-        <div id="message-area">
-            <form action="{{ route('favorite.store') }}" method="POST">
-                @csrf
-                <input type="text" id="trip_name" name="trip_name"
-                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"
-                       placeholder="Plaats hier uw titel"
-                       value="nieuw!">
-                <input type="text" id="trip_url" name="trip_url"
-                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"
-                       placeholder="Plaats hier uw URL" value="nieuw">
-                <button type="submit">Submit</button>
-            </form>
+        <div id="message-area" class="no-scroll">
+{{--            <form action="{{ route('favorite.store') }}" method="POST">--}}
+{{--                @csrf--}}
+{{--                <input type="text" id="trip_name" name="trip_name"--}}
+{{--                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"--}}
+{{--                       placeholder="Plaats hier uw titel"--}}
+{{--                       value="nieuw!">--}}
+{{--                <input type="text" id="trip_url" name="trip_url"--}}
+{{--                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"--}}
+{{--                       placeholder="Plaats hier uw URL" value="nieuw">--}}
+{{--                <button type="submit">Submit</button>--}}
+{{--            </form>--}}
         </div>
 
         <div>
@@ -43,13 +66,16 @@
 
 
             <form id="chatbox" class="rounded bg-gray-100 w-full flex justify-center flex-col gap-3 items-center">
-                <div id="help-box" class="flex flex-col w-full justify-center items-center">
+                <div id="help-box" @if($messages === null) style="transform: translateY(200px);" @else style="transform: translateY(-18px);" @endif class="flex flex-col w-full justify-center items-center">
                     <div id="help-box-arrow">
-                        <svg id="help-box-arrow-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M480-360 280-560h400L480-360Z"/></svg>
+                        <svg id="help-box-arrow-icon" xmlns="http://www.w3.org/2000/svg" height="24px"
+                             viewBox="0 -960 960 960" width="24px" fill="#000000">
+                            <path d="M480-360 280-560h400L480-360Z"/>
+                        </svg>
                     </div>
                     <div class="help-box flex flex-row justify-between items-center p-3">
                         <div class="flex flex-row gap-4">
-                            <a class="btn-outline-stylish" href="{{ route('chat.emissions') }}">
+                            <a id="emmisions-button" class="btn-outline-stylish">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
                                      width="24px" fill="#000000">
                                     <path

@@ -17,16 +17,18 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [ChatController::class, 'viewChat'])->name('chat');
+Route::get('/chat/{id}', [ChatController::class, 'loadHistory'])->name('chat.history');
 
 Route::get('/favorieten', [FavoritesController::class, 'viewFavorites'])->name('favorites');
 Route::post('/saveFavoriet', [FavoritesController::class, 'store'])->name('favorite.store');
 
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
 
-Route::get('/uitstoot', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
+Route::get('/uitstoot/{id}', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
 Route::post('/berichten', [ChatController::class, 'store']);
 Route::post('/berichten-create', [ChatController::class, 'create']);
+Route::post('/berichten-update/{id}', [ChatController::class, 'update']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profiel', [ProfileController::class, 'view'])->name('profile');
