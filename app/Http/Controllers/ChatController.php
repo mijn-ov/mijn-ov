@@ -13,12 +13,44 @@ class ChatController extends Controller
 {
     public function viewChat()
     {
-        return view('app.chat');
+        if(Auth::user()) {
+            $histories = History::where('user_id', Auth::id())
+                ->latest()
+                ->take(3)
+                ->get();
+
+            $messages = null;
+
+            return view('app.chat', ['histories' => $histories, 'messages' => $messages]);
+        } else {
+            $messages = null;
+            return view('app.chat', ['messages' => $messages]);
+        }
     }
 
-    public function viewEmissions()
+    public function loadHistory($id)
     {
-        return view('app.emissions');
+        $history = History::where('id', $id)->first();
+
+        // Check if the history exists and if the user ID matches the authenticated user
+        if (!$history || $history->user_id !== (Auth::id())) {
+            return redirect(route('chat'));
+        }
+
+
+        $messages = Message::where('history_id', $id)
+            ->where('user_id', Auth::id() || null)
+            ->get();
+        $histories = null;
+
+
+        return view('app.chat', ['messages' => $messages, 'histories' => $histories]);
+    }
+
+
+    public function viewEmissions($id)
+    {
+        return view('app.emissions', ['id' => $id]);
     }
 
     public function submitMessage()
@@ -44,6 +76,7 @@ Als laatste moet je kijken of er in het bericht nog dingen staan waar je paramet
 "[?lang][&fromStation][&originUicCode][&originLat][&originLng][&originName][&toStation][&destinationUicCode][&destinationLat][&destinationLng][&destinationName][&viaStation][&viaUicCode][&viaLat][&viaLng][&originWalk][&originBike][&originCar][&destinationWalk][&destinationBike][&destinationCar][&dateTime][&searchForArrival][&departure][&context][&shorterChange][&addChangeTime][&minimalChangeTime][&viaWaitTime][&originAccessible][&travelAssistance][&nsr][&travelAssistanceTransferTime][&accessibilityEquipment1][&accessibilityEquipment2][&searchForAccessibleTrip][&filterTransportMode][&localTrainsOnly][&excludeHighSpeedTrains][&excludeTrainsWithReservationRequired][&product][&discount][&travelClass][&passing][&travelRequestType][&disabledTransportModalities][&firstMileModality][&lastMileModality][&entireTripModality]".
 Als je parameters in het bericht van de gebruiker kan vinden moet je die in het "parameters" veld van de JSON zetten.
 Het eerste wat je moet vinden is de longitude en latitude van het begin en eindpunt van de gebruiker.
+Geef het gesprek een titel.
 
 
 Als je tegen een error aanloopt tijdens het vinden van een begin en eindpunt, laat dan een bericht achter in "message" en laat de andere JSON dingen zoals "destination, parameters en origin" leeg. geef een technische uitleg in het "error" veld.
@@ -53,6 +86,7 @@ Samengevat:
 2. Als er een error is, geef dan een foutmelding en hulp in "message" en een technische uitleg in "error". Laat de andere velden leeg.
 3. Laat een bericht achter in "message"
 4. Kijk of er andere parameters ingevuld kunnen worden.
+5. Geef het gesprek een titel.
 
 Je moet je antwoord in een JSON formaat sturen, ook tijdens een error!
 
@@ -63,6 +97,7 @@ Hier is het exacte formaat van de JSON, zorg dat je altijd deze vier velden hebt
    "message": "your message to the customer",
    "parameters": "additional parameters you can find",
    "error": "The optional error you had while getting an start and endpoint.",
+   "title": "The title of the message",
 }
 
 Stuur nooit iets zonder dat het in een JSON formaat is!
@@ -106,6 +141,20 @@ Hier is het bericht van de gebruiker:' .
         return response()->json(['chatID' => $history->id]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string'
+        ]);
+
+        $history = History::find($id);
+
+        $history->title = $request->input('title');
+
+        $history->save();
+
+        return response()->json(['title' => $history->title, 'id' => $history->id]);
+    }
 
     public function store(Request $request)
     {
@@ -126,6 +175,4 @@ Hier is het bericht van de gebruiker:' .
 
         return response()->json(['status' => 'success']);
     }
-
-
 }
