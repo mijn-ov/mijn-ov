@@ -8,20 +8,16 @@
         <div id="app-splash" class="flex justify-center items-center flex-col w-full p-5"
              style="transform: translateY(-20px);">
             @if($messages === null)
-            <img class="w-96" alt="logo" src="{{ asset('img/ov-logo.png') }}">
-            @auth()
-                <p class="logo-text">Hoi {{ Auth::user()->name }}!</p>
-            @endauth
+                <img class="w-96" alt="logo" src="{{ asset('img/ov-logo.png') }}">
 
-            <p class="logo-text" id="welcome-text"></p>
+                <p class="logo-text" id="welcome-text"></p>
             @endif
 
             @auth()
                 @if($histories !== null)
-                    <div id="history"
-                         class="flex flex-row gap-4 w-1/2 overflow-scroll no-scroll items-center justify-center">
+                    <div id="history" class="flex flex-row gap-4 w-1/2 justify-center">
                         @foreach($histories as $history)
-                            <a href="{{ route('chat.history', [$history->id]) }}">
+                            <a href="{{ route('chat.history', [$history->id]) }}" class="w-1/2">
                                 <div class="history-button" data-id="{{ $history->id }}">
                                     <p>{{ $history->title }}</p>
                                 </div>
@@ -40,17 +36,17 @@
 
 
         <div id="message-area" class="no-scroll">
-{{--            <form action="{{ route('favorite.store') }}" method="POST">--}}
-{{--                @csrf--}}
-{{--                <input type="text" id="trip_name" name="trip_name"--}}
-{{--                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"--}}
-{{--                       placeholder="Plaats hier uw titel"--}}
-{{--                       value="nieuw!">--}}
-{{--                <input type="text" id="trip_url" name="trip_url"--}}
-{{--                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"--}}
-{{--                       placeholder="Plaats hier uw URL" value="nieuw">--}}
-{{--                <button type="submit">Submit</button>--}}
-{{--            </form>--}}
+            {{--            <form action="{{ route('favorite.store') }}" method="POST">--}}
+            {{--                @csrf--}}
+            {{--                <input type="text" id="trip_name" name="trip_name"--}}
+            {{--                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"--}}
+            {{--                       placeholder="Plaats hier uw titel"--}}
+            {{--                       value="nieuw!">--}}
+            {{--                <input type="text" id="trip_url" name="trip_url"--}}
+            {{--                       class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"--}}
+            {{--                       placeholder="Plaats hier uw URL" value="nieuw">--}}
+            {{--                <button type="submit">Submit</button>--}}
+            {{--            </form>--}}
         </div>
 
         <div>
@@ -66,7 +62,9 @@
 
 
             <form id="chatbox" class="rounded bg-gray-100 w-full flex justify-center flex-col gap-3 items-center">
-                <div id="help-box" @if($messages === null) style="transform: translateY(200px);" @else style="transform: translateY(-18px);" @endif class="flex flex-col w-full justify-center items-center">
+                <div id="help-box" @if($messages === null) style="transform: translateY(200px);"
+                     @else style="transform: translateY(-18px);"
+                     @endif class="flex flex-col w-full justify-center items-center">
                     <div id="help-box-arrow">
                         <svg id="help-box-arrow-icon" xmlns="http://www.w3.org/2000/svg" height="24px"
                              viewBox="0 -960 960 960" width="24px" fill="#000000">
@@ -92,7 +90,8 @@
                             <a class="btn-outline-stylish" href="{{ route('chat.map') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 576 512"
                                      width="24px" fill="#000000">
-                                    <path d="M565.6 36.2C572.1 40.7 576 48.1 576 56V392c0 10-6.2 18.9-15.5 22.4l-168 64c-5.2 2-10.9 2.1-16.1 .3L192.5 417.5l-160 61c-7.4 2.8-15.7 1.8-22.2-2.7S0 463.9 0 456V120c0-10 6.1-18.9 15.5-22.4l168-64c5.2-2 10.9-2.1 16.1-.3L383.5 94.5l160-61c7.4-2.8 15.7-1.8 22.2 2.7zM48 136.5V421.2l120-45.7V90.8L48 136.5zM360 422.7V137.3l-144-48V374.7l144 48zm48-1.5l120-45.7V90.8L408 136.5V421.2z"/>
+                                    <path
+                                        d="M565.6 36.2C572.1 40.7 576 48.1 576 56V392c0 10-6.2 18.9-15.5 22.4l-168 64c-5.2 2-10.9 2.1-16.1 .3L192.5 417.5l-160 61c-7.4 2.8-15.7 1.8-22.2-2.7S0 463.9 0 456V120c0-10 6.1-18.9 15.5-22.4l168-64c5.2-2 10.9-2.1 16.1-.3L383.5 94.5l160-61c7.4-2.8 15.7-1.8 22.2 2.7zM48 136.5V421.2l120-45.7V90.8L48 136.5zM360 422.7V137.3l-144-48V374.7l144 48zm48-1.5l120-45.7V90.8L408 136.5V421.2z"/>
                                 </svg>
                             </a>
                         </div>
