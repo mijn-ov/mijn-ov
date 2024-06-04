@@ -1,3 +1,6 @@
+
+
+
 window.addEventListener('load', init)
 window.addEventListener('resize', updateTransform);
 
@@ -19,6 +22,11 @@ let helpBoxArrowIcon;
 let helpBoxOpen = false;
 let firstChat = true;
 
+let chatID;
+
+let emmisionsButton;
+
+
 function init() {
     chatInput = document.getElementById('chat-box');
     helpText = document.getElementById('help-text');
@@ -29,6 +37,13 @@ function init() {
     helpBox = document.getElementById('help-box');
     helpBoxArrow = document.getElementById('help-box-arrow')
     helpBoxArrowIcon = document.getElementById('help-box-arrow-icon')
+
+    emmisionsButton = document.getElementById('emmisions-button')
+
+    emmisionsButton.addEventListener('click', function () {
+        console.log(chatID)
+        window.location.href = `/uitstoot/${chatID}`;
+    })
 
     chatForum.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -45,9 +60,50 @@ function init() {
             closeHelpBox()
         }
     })
+
+    if (chatHistoryData) {
+        console.log(chatHistoryData)
+        try {
+
+            chatHistoryData.forEach(history => {
+                try {
+                    const messageObj = JSON.parse(history.message);
+
+                    if (messageObj.agent === 'user') {
+                        createUserBubble(messageObj.message);
+                    } else if (messageObj.agent === 'bot') {
+                        createBotBubble(messageObj.message);
+                    }
+
+                    const dataObj = JSON.parse(history.data);
+                    if (dataObj) {
+                        createRoute(dataObj)
+                    }
+
+                } catch (error) {
+                    console.error('Error parsing message:', error);
+                }
+            });
+
+            openHelpBox()
+            appSplash.remove()
+
+            firstChat = false;
+
+            chatID = chatHistoryData[0].history_id
+            console.log(chatID)
+        } catch (error) {
+            console.error('Error parsing chat history data:', error);
+        }
+    }
 }
 
 function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation) {
+    if (firstChat) {
+        openHelpBox();
+    }
+    firstChat = false
+
     //div + div header
     let routePartial = document.createElement('div');
     routePartial.classList.add('route-partial');
@@ -122,10 +178,6 @@ function createUserBubble(text) {
 }
 
 function createBotBubble(text) {
-    if (firstChat) {
-        openHelpBox();
-    }
-    firstChat = false
 
     let chatBubble = document.createElement('div');
     chatBubble.classList.add('chat-bubble-bot');
@@ -149,7 +201,7 @@ function updateTransform() {
     }
 }
 
-function submitChat() {
+async function submitChat() {
 
     if (helpText !== null) {
         helpText.remove()
@@ -160,12 +212,15 @@ function submitChat() {
     chatText = chatInput.value
     chatInput.value = '';
 
+
     createUserBubble(chatText);
 
     let newMessage = {
         agent: 'user',
-        message: chatText
+        message: chatText,
     };
+
+    handleChat(newMessage)
 
     messages.push(newMessage);
     console.log(messages);
@@ -195,14 +250,32 @@ function submitChat() {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-
 }
 
+async function handleChat(messsage) {
+    if (firstChat) {
+        try {
+            const response = await createHistory('Gesprek zonder titel');
+            chatID = response.chatID; // Update chatID with the newly created one
+        } catch (error) {
+            console.error('Error creating history:', error);
+            return; // Exit if there's an error creating history
+        }
+    }
+
+    if (chatID) {
+        await uploadMessages(messsage);
+    }
+}
+
+
 async function receiveMessage(data) {
+    console.log(data.response)
     let jsonResponse = JSON.parse(data.response);
 
     try {
-        const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY'; // Replace with your Google API Key
+
+        const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
         const proxyUrl = 'https://api.allorigins.win/get?url=';
         const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
 
@@ -211,6 +284,9 @@ async function receiveMessage(data) {
             throw new Error('Network response was not ok');
         }
 
+        createBotBubble(jsonResponse.message)
+
+        updateHistory(jsonResponse.title)
 
         const data = await response.json();
         const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
@@ -218,7 +294,9 @@ async function receiveMessage(data) {
         if (apiResponse.status !== 'OK') {
             throw new Error(`API Error: ${apiResponse.status}`);
         }
-
+        let originPoints = [];
+        let destinationPoints = [];
+        let mapInfoPoints = [];
         for (let leg of apiResponse.routes[0].legs[0].steps) {
             if (leg.travel_mode !== "WALKING") {
                 let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
@@ -226,8 +304,12 @@ async function receiveMessage(data) {
                 let legCategory = leg.transit_details.line.vehicle.name;
                 let originTrack = leg.transit_details.departure_stop.name;
                 let destinationTrack = leg.transit_details.arrival_stop.name;
+                //let originPoint = leg.transit_details.departure_stop.location;
+                //let destinationPoint = leg.transit_details.arrival_stop.location;
+                let mapInfo = leg;
 
-                console.log(originTrack, destinationTrack);
+                // Push origin and destination points to their respective arrays
+                mapInfoPoints.push(mapInfo);
                 createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
             } else {
                 createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
@@ -236,12 +318,21 @@ async function receiveMessage(data) {
         document.getElementById("trip_name").value = `${jsonResponse.origin} -> ${jsonResponse.destination}`;
         document.getElementById("trip_url").value = proxyUrl + encodeURIComponent(endpoint);
         console.log(document.getElementById('trip_url').value);
+        localStorage.setItem('mapInfoPoints', JSON.stringify(mapInfoPoints));
+
+
+        createRoute(apiResponse);
 
         let newMessage = {
             agent: 'bot',
-            message: jsonResponse.beschrijving,
-            data: jsonResponse.data,
+            message: jsonResponse.message,
         };
+
+        console.log(newMessage)
+
+        if (chatID) {
+            await uploadMessages(newMessage, JSON.stringify(apiResponse), chatID);
+        }
 
         messages.push(newMessage);
         console.log(messages);
@@ -252,24 +343,80 @@ async function receiveMessage(data) {
     }
 }
 
-function uploadMessages(messages) {
-    fetch('/berichten', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        },
-        body: JSON.stringify({messages: messages}),
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+
+function createRoute(apiResponse) {
+    for (let leg of apiResponse.routes[0].legs[0].steps) {
+        if (leg.travel_mode !== "WALKING") {
+            let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
+            let legDuration = leg.duration.text;
+            let legCategory = leg.transit_details.line.vehicle.name;
+            let originTrack = leg.transit_details.departure_stop.name;
+            let destinationTrack = leg.transit_details.arrival_stop.name;
+
+            console.log(originTrack, destinationTrack);
+            createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
+        } else {
+            createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
+        }
+    }
 }
+
+async function createHistory(title) {
+    try {
+        const response = await fetch('/berichten-create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ history: title }),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating history:', error);
+    }
+}
+
+async function updateHistory(title) {
+    try {
+        const response = await fetch(`/berichten-update/${chatID}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ title: title }),
+        });
+        await console.log(response.json())
+    } catch (error) {
+        console.error('Error updating history:', error);
+    }
+}
+
+async function uploadMessages(messages, apidata, id) {
+    try {
+        const response = await fetch('/berichten', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({
+                messages: messages,
+                data: apidata || null,
+                history_id: chatID,
+            }),
+        });
+        const data = await response.json();
+        console.log('Success:', data);
+    } catch (error) {
+        console.error('Error uploading messages:', error);
+    }
+}
+
 
 function openHelpBox() {
     console.log('Help open')

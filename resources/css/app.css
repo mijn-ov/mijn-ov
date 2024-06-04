@@ -36,7 +36,6 @@ body {
 }
 
 #help-box {
-    transform: translateY(200px);
     transition: 0.5s ease-in-out;
     position: absolute;
 }
@@ -68,11 +67,11 @@ body {
     transition: 0.5s ease-in-out;
 }
 
-#message-area::-webkit-scrollbar {
+.no-scroll::-webkit-scrollbar {
     display: none;
 }
 
-#message-area {
+.no-scroll {
     ms-overflow-style: none;
     scrollbar-width: none;
 }
@@ -302,6 +301,18 @@ nav {
 .settings-line {
     border-bottom: 2px solid #d2d2d2;
 }
+
+.history-button {
+    background: #d2d2d2;
+    padding: 5px;
+    border-radius: 5px;
+    max-width: 300px;
+}
+
+.history-button:active {
+    background: #b6b6b6;
+}
+
 
 .settings-form {
     background-color: var(--ov-white);
