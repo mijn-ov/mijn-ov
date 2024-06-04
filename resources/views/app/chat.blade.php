@@ -56,6 +56,7 @@
                     </div>
                     <div class="flex flex-row gap-4">
                         <form action="{{ route('favorite.store') }}" id="favoriteForm" method="POST" style="margin-bottom: 0">
+                            @csrf
                             <input type="text" id="trip_name" name="trip_name"
                                    class="button button-outline border-black mg-0 gray text-small w-75 mg-bottom-4"
                                    placeholder="Plaats hier uw titel"
