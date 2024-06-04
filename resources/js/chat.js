@@ -1,3 +1,6 @@
+
+
+
 window.addEventListener('load', init)
 window.addEventListener('resize', updateTransform);
 
@@ -290,6 +293,29 @@ async function receiveMessage(data) {
         if (apiResponse.status !== 'OK') {
             throw new Error(`API Error: ${apiResponse.status}`);
         }
+        let originPoints = [];
+        let destinationPoints = [];
+        let mapInfoPoints = [];
+        for (let leg of apiResponse.routes[0].legs[0].steps) {
+            if (leg.travel_mode !== "WALKING") {
+                let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
+                let legDuration = leg.duration.text;
+                let legCategory = leg.transit_details.line.vehicle.name;
+                let originTrack = leg.transit_details.departure_stop.name;
+                let destinationTrack = leg.transit_details.arrival_stop.name;
+                //let originPoint = leg.transit_details.departure_stop.location;
+                //let destinationPoint = leg.transit_details.arrival_stop.location;
+                let mapInfo = leg;
+
+                // Push origin and destination points to their respective arrays
+                mapInfoPoints.push(mapInfo);
+                createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
+            } else {
+                createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
+            }
+        }
+        localStorage.setItem('mapInfoPoints', JSON.stringify(mapInfoPoints));
+
 
         createRoute(apiResponse);
 

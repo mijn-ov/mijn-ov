@@ -16,6 +16,7 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
-        "dotenv": "^16.4.5"
+        "dotenv": "^16.4.5",
+        "leaflet-routing-machine": "^3.2.12"
     }
 }

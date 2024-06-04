@@ -53,6 +53,11 @@ class ChatController extends Controller
         return view('app.emissions', ['id' => $id]);
     }
 
+    public function viewMap()
+    {
+        return view('app.map');
+    }
+
     public function submitMessage()
     {
         // Get the JSON data from the request body
