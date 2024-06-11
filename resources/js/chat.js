@@ -25,6 +25,7 @@ let firstChat = true;
 let chatID;
 
 let emmisionsButton;
+let mapButton;
 
 
 function init() {
@@ -38,12 +39,20 @@ function init() {
     helpBoxArrow = document.getElementById('help-box-arrow')
     helpBoxArrowIcon = document.getElementById('help-box-arrow-icon')
 
-    emmisionsButton = document.getElementById('emmisions-button')
+    emmisionsButton = document.getElementById('emmisions-button');
+    mapButton = document.getElementById('map-button');
 
     emmisionsButton.addEventListener('click', function () {
         console.log(chatID)
         window.location.href = `/uitstoot/${chatID}`;
     })
+
+    mapButton.addEventListener('click', function () {
+        console.log(chatID)
+        window.location.href = `/map/${chatID}`;
+    })
+
+
 
     chatForum.addEventListener('submit', function (e) {
         e.preventDefault();

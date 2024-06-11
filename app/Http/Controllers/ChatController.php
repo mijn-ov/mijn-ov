@@ -53,9 +53,9 @@ class ChatController extends Controller
         return view('app.emissions', ['id' => $id]);
     }
 
-    public function viewMap()
+    public function viewMap($id)
     {
-        return view('app.map');
+        return view('app.map', ['id' => $id]);
     }
 
     public function submitMessage()
