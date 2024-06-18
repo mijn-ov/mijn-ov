@@ -13,7 +13,7 @@ class ChatController extends Controller
 {
     public function viewChat()
     {
-        if(Auth::user()) {
+        if (Auth::user()) {
             $histories = History::where('user_id', Auth::id())
                 ->latest()
                 ->take(3)
@@ -72,43 +72,44 @@ class ChatController extends Controller
             ->withQueryParam('api-version', env('OPENAI_API_VERSION'))
             ->make();
 
+
         $prompt = '
-Je bent nu een reisassistent AI. Het is jouw taak om een JSON bestand te maken voor de gebruiker met daarin benodigde gegevens.
+You are now a travel assistant AI. Your task is to create a JSON file for the user containing the necessary travel data.
 
-Je moet in het bericht van de gebruiker een begin en eindpunt van zijn reis halen. Deze moet je als eerste in het JSON bestand zetten onder "origin" en "destination".
-Daarna moet je een bericht voor de gebruiker achterlaten, bijvoorbeeld door hem of haar een fijne rit te wensen, begin het bericht met: "hier is uw route van _ naar _", geef je eigen draai aan dit bericht. Zet deze in het derde veld van de JSON, namelijk het "message" veld.
-Als laatste moet je kijken of er in het bericht nog dingen staan waar je parameters van kunt maken, hier is een lijst van alle parameters:
-"[?lang][&fromStation][&originUicCode][&originLat][&originLng][&originName][&toStation][&destinationUicCode][&destinationLat][&destinationLng][&destinationName][&viaStation][&viaUicCode][&viaLat][&viaLng][&originWalk][&originBike][&originCar][&destinationWalk][&destinationBike][&destinationCar][&dateTime][&searchForArrival][&departure][&context][&shorterChange][&addChangeTime][&minimalChangeTime][&viaWaitTime][&originAccessible][&travelAssistance][&nsr][&travelAssistanceTransferTime][&accessibilityEquipment1][&accessibilityEquipment2][&searchForAccessibleTrip][&filterTransportMode][&localTrainsOnly][&excludeHighSpeedTrains][&excludeTrainsWithReservationRequired][&product][&discount][&travelClass][&passing][&travelRequestType][&disabledTransportModalities][&firstMileModality][&lastMileModality][&entireTripModality]".
-Als je parameters in het bericht van de gebruiker kan vinden moet je die in het "parameters" veld van de JSON zetten.
-Het eerste wat je moet vinden is de longitude en latitude van het begin en eindpunt van de gebruiker.
-Geef het gesprek een titel.
+1. Extract the starting point ("origin") and destination ("destination") from the user\'s message. If the starting point or destination is a metro station like "Blaak" or "Beurs", make sure to include the city name (e.g., "Blaak, Rotterdam").
+2. If the user requests the current location for the starting point or destination, use "current location" for that point. Additionally, use the user\'s current location from the GPS data (provided in JSON format) and place these respectively in "originLng" and "originLat" for the starting point, or in "destinationLng" and "destinationLat" for the destination.
+3. Leave a message for the user under "message". Start the message with "Hier is uw route van _ naar _" and add a personal touch.
+4. Look for other possible parameters in the user\'s message and add these to the "parameters" field. Use the following list of possible parameters:
+   "[?lang][&fromStation][&originUicCode][&originLat][&originLng][&originName][&toStation][&destinationUicCode][&destinationLat][&destinationLng][&destinationName][&viaStation][&viaUicCode][&viaLat][&viaLng][&originWalk][&originBike][&originCar][&destinationWalk][&destinationBike][&destinationCar][&dateTime][&searchForArrival][&departure][&context][&shorterChange][&addChangeTime][&minimalChangeTime][&viaWaitTime][&originAccessible][&travelAssistance][&nsr][&travelAssistanceTransferTime][&accessibilityEquipment1][&accessibilityEquipment2][&searchForAccessibleTrip][&filterTransportMode][&localTrainsOnly][&excludeHighSpeedTrains][&excludeTrainsWithReservationRequired][&product][&discount][&travelClass][&passing][&travelRequestType][&disabledTransportModalities][&firstMileModality][&lastMileModality][&entireTripModality]".
+5. If the origin or destination cannot be determined, include a polite error message in the "message" field indicating that more information is needed.
+6. Provide a suitable title for the conversation, including the starting or ending point if available.
 
+Summary:
+- Extract the origin and destination from the user\'s message. If not provided or if "current location" is requested, use "current location" for the respective point.
+- Always include GPS coordinates in the parameters [&originLat], [&originLng] or [&destinationLat], [&destinationLng] if using the current location.
+- Include the city name for metro stations like "Blaak" or "Beurs".
+- Place a message for the user under "message".
+- Fill in other possible parameters.
+- Provide a title for the conversation with the starting or ending point if available.
+- If no useful information is found, respond with a JSON containing a polite error message in the "message" field.
 
-Als je tegen een error aanloopt tijdens het vinden van een begin en eindpunt, laat dan een bericht achter in "message" en laat de andere JSON dingen zoals "destination, parameters en origin" leeg. geef een technische uitleg in het "error" veld.
+Always respond in JSON format, even in case of an error!
 
-Samengevat:
-1. Haal een begin en eindpunt uit een bericht van de gebruiker.
-2. Als er een error is, geef dan een foutmelding en hulp in "message" en een technische uitleg in "error". Laat de andere velden leeg.
-3. Laat een bericht achter in "message"
-4. Kijk of er andere parameters ingevuld kunnen worden.
-5. Geef het gesprek een passende titel met het start of eindpunt.
-
-Je moet je antwoord in een JSON formaat sturen, ook tijdens een error!
-
-Hier is het exacte formaat van de JSON, zorg dat je altijd deze vier velden hebt en verander nooit de namen van deze velden.
+Here is the exact JSON format. Ensure these five fields are always present, and do not change the names of these fields:
 {
    "origin": "origin",
    "destination": "destination",
-   "message": "your message to the customer",
-   "parameters": "additional parameters you can find",
-   "error": "The optional error you had while getting an start and endpoint.",
-   "title": "The title of the conversation, include at least one of the locations.",
+   "message": "Your message to the user",
+   "parameters": "Any additional parameters found",
+   "title": "The title of the conversation with the locations."
 }
 
-Stuur nooit iets zonder dat het in een JSON formaat is!
+Here is the user\'s current location (if needed):
+' . $data->location . '
 
-Hier is het bericht van de gebruiker:' .
-            $data->message;
+Here is the user\'s message:
+' . $data->message;
+
 
         $result = $client->chat()->create([
             'messages' => [
@@ -129,6 +130,7 @@ Hier is het bericht van de gebruiker:' .
         header('Content-Type: application/json');
 
         // Send the response back to the client
+//        return response()->json($json_response);
         echo $json_response;
     }
 
