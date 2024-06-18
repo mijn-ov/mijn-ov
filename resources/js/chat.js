@@ -1,6 +1,3 @@
-
-
-
 window.addEventListener('load', init)
 window.addEventListener('resize', updateTransform);
 
@@ -26,6 +23,7 @@ let chatID;
 
 let emmisionsButton;
 
+const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
 
 function init() {
     chatInput = document.getElementById('chat-box');
@@ -227,6 +225,21 @@ async function submitChat() {
 
     messageArea.scrollTop = messageArea.scrollHeight;
 
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(sendMessageToBackend);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+async function sendMessageToBackend(position) {
+
+    // console.log({
+    //     message: chatText,
+    //     history: messages,
+    //     location: position.coords,
+    // })
+
     fetch(`/submit-message`, {
         method: 'POST',
         headers: {
@@ -236,6 +249,7 @@ async function submitChat() {
         body: JSON.stringify({
             message: chatText,
             history: messages,
+            location: JSON.stringify(position.coords),
         })
     })
         .then(response => {
@@ -270,23 +284,57 @@ async function handleChat(messsage) {
 
 
 async function receiveMessage(data) {
-    console.log(data.response)
+    console.log(data.response);
     let jsonResponse = JSON.parse(data.response);
 
-    try {
+    createBotBubble(jsonResponse.message);
 
-        const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
+    let newMessage = {
+        agent: 'bot',
+        message: jsonResponse.message,
+    };
+
+    if (chatID) {
+        await uploadMessages(newMessage, null, chatID);
+    }
+    updateHistory(jsonResponse.title);
+
+    console.log(data);
+
+    try {
         const proxyUrl = 'https://api.allorigins.win/get?url=';
-        const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
+        let endpoint;
+
+        // Function to get current location as a Promise
+        const getCurrentPosition = () => {
+            return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
+            });
+        };
+
+        if (jsonResponse.origin === 'current location' || jsonResponse.destination === 'current location') {
+            // Get current location
+            const position = await getCurrentPosition();
+            const currentLat = position.coords.latitude;
+            const currentLng = position.coords.longitude;
+
+            if (jsonResponse.origin === 'current location') {
+                endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&originLat=${encodeURIComponent(currentLat)}&originLng=${encodeURIComponent(currentLng)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
+            }
+
+            if (jsonResponse.destination === 'current location') {
+                endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.origin)}&destinationLat=${encodeURIComponent(currentLat)}&destinationLng=${encodeURIComponent(currentLng)}&mode=transit&key=${apiKey}&language=nl`;
+            }
+        } else {
+            endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
+        }
+
+        console.log(endpoint)
 
         const response = await fetch(proxyUrl + encodeURIComponent(endpoint));
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-
-        createBotBubble(jsonResponse.message)
-
-        updateHistory(jsonResponse.title)
 
         const data = await response.json();
         const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
@@ -294,8 +342,7 @@ async function receiveMessage(data) {
         if (apiResponse.status !== 'OK') {
             throw new Error(`API Error: ${apiResponse.status}`);
         }
-        let originPoints = [];
-        let destinationPoints = [];
+
         let mapInfoPoints = [];
         for (let leg of apiResponse.routes[0].legs[0].steps) {
             if (leg.travel_mode !== "WALKING") {
@@ -304,34 +351,30 @@ async function receiveMessage(data) {
                 let legCategory = leg.transit_details.line.vehicle.name;
                 let originTrack = leg.transit_details.departure_stop.name;
                 let destinationTrack = leg.transit_details.arrival_stop.name;
-                //let originPoint = leg.transit_details.departure_stop.location;
-                //let destinationPoint = leg.transit_details.arrival_stop.location;
                 let mapInfo = leg;
 
                 // Push origin and destination points to their respective arrays
                 mapInfoPoints.push(mapInfo);
                 createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
             } else {
-                createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text)
+                createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text);
             }
         }
+
         document.getElementById("trip_name").value = `${jsonResponse.origin} -> ${jsonResponse.destination}`;
         document.getElementById("trip_url").value = proxyUrl + encodeURIComponent(endpoint);
         console.log(document.getElementById('trip_url').value);
         localStorage.setItem('mapInfoPoints', JSON.stringify(mapInfoPoints));
 
-
         createRoute(apiResponse);
 
-        let newMessage = {
+        let newMessage2 = {
             agent: 'bot',
-            message: jsonResponse.message,
+            message: '',
         };
 
-        console.log(newMessage)
-
         if (chatID) {
-            await uploadMessages(newMessage, JSON.stringify(apiResponse), chatID);
+            await uploadMessages(newMessage2, JSON.stringify(apiResponse), chatID);
         }
 
         messages.push(newMessage);
@@ -370,7 +413,7 @@ async function createHistory(title) {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             },
-            body: JSON.stringify({ history: title }),
+            body: JSON.stringify({history: title}),
         });
         return await response.json();
     } catch (error) {
@@ -387,7 +430,7 @@ async function updateHistory(title) {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             },
-            body: JSON.stringify({ title: title }),
+            body: JSON.stringify({title: title}),
         });
         await console.log(response.json())
     } catch (error) {

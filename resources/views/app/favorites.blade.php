@@ -158,36 +158,5 @@
             <div id="{{$favorite->id}}" style="z-index: 30; transform: translateY(-100%); opacity: 0"
                  class="trip"></div>
         @endforeach
-        <div id="200"
-             style="z-index: 30; transform: translateY(0px); opacity: 1; margin-bottom: 0px; transition: all 700ms ease-in-out 700ms;"
-             class="route">
-            <div class="route-partial"><p>Loop naar Amsterdam Centraal</p>
-                <div class="leg-header"><p>0,2 km ● 1 min</p>
-                    <p>Lopen</p></div>
-            </div>
-            <div class="route-partial">
-                <div class="leg-header"><p>Trein Rotterdam Centraal ● 43 min</p>
-                    <p>Trein</p></div>
-                <div><p class="station">Opstap:</p>
-                    <p>Amsterdam Centraal</p></div>
-                <img src="img/arrow-right.svg" class="arrowImg">
-                <div><p class="station">Afstap:</p>
-                    <p>Rotterdam Centraal</p></div>
-            </div>
-            <div class="route-partial"><p>Loop naar Rotterdam, Henegouwerplein</p>
-                <div class="leg-header"><p>0,6 km ● 8 min</p>
-                    <p>Lopen</p></div>
-
-            </div>
-            <div class="route-partial">
-                <div class="leg-header"><p>Bus Station Schiedam Centrum ● 14 min</p>
-                    <p>Bus</p></div>
-                <div><p class="station">Opstap:</p>
-                    <p>Rotterdam, Henegouwerplein</p></div>
-                <img src="img/arrow-right.svg" class="arrowImg">
-                <div><p class="station">Afstap:</p>
-                    <p>Schiedam, Station Schiedam Centrum</p></div>
-            </div>
-        </div>
     </div>
 @endsection
