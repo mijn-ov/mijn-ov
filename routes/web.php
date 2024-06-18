@@ -27,7 +27,7 @@ Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('
 
 Route::get('/uitstoot/{id}', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
-Route::get('/map', [ChatController::class, 'viewMap'])->name('chat.map');
+Route::get('/map/{id}', [ChatController::class, 'viewMap'])->name('chat.map');
 
 Route::post('/berichten', [ChatController::class, 'store']);
 Route::post('/berichten-create', [ChatController::class, 'create']);
