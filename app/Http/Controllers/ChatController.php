@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agenda;
 use App\Models\History;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
@@ -69,6 +70,57 @@ class ChatController extends Controller
             ->get();
 
         return view('app.explanation', ['id' => $id, 'data' => $data]);
+    }
+
+    public function viewAgenda($id)
+    {
+        $data = Message::where('history_id', $id)
+            ->whereNotNull('data')
+            ->get();
+
+
+        return view('app.agenda.add', ['id' => $id, 'data' => $data]);
+    }
+
+    public function addToAgenda(Request $request)
+    {
+        $request->validate([
+            'day' => 'required|string',
+            'time' => 'required|string',
+            'trip' => 'required|string',
+            'travel_type' => 'required|boolean',
+        ]);
+
+        $trip = $request->input('trip');
+
+        $addresses = explode(' | ', $trip);
+
+        if(count($addresses) == 3) {
+            $start_address = $addresses[0];
+            $end_address = $addresses[1];
+            $duration = $addresses[2];
+
+            $durationParts = explode(' ', $duration); // Split by space
+            $hours = (int) $durationParts[0]; // Convert first element to integer (hours)
+            $minutes = explode('min', $durationParts[1])[0]; // Extract minutes before "min"
+            $minutes = (int) $minutes; // Convert minutes to integer
+
+            $totalMinutes = ($hours * 60) + $minutes;
+
+            $agenda = new Agenda();
+            $agenda->user_id = auth()->id(); // Assuming you want to associate the current authenticated user
+            $agenda->day = $request->input('day');
+            $agenda->time = $request->input('time');
+            $agenda->start_address = $start_address;
+            $agenda->end_address = $end_address;
+            $agenda->duration = $totalMinutes;
+            $agenda->travel_type = $request->input('travel_type');;
+            $agenda->save();
+
+            return redirect(route('agenda.view'));
+        } else {
+            return response()->json(['error' => 'Invalid trip format'], 400);
+        }
     }
 
     public function submitMessage()
