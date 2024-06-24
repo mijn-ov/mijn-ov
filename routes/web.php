@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\EmissionsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FavoriteController;
+use App\http\Controllers\PersonalEmissions;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +27,9 @@ Route::get('/favorieten', [FavoriteController::class, 'viewFavorites'])->name('f
 Route::post('/saveFavoriet', [FavoriteController::class, 'store'])->name('favorite.store');
 
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
+
+
+Route::post('/uitstoot', [EmissionsController::class, 'viewEmissions'])->name('chat.emissions');
 
 Route::get('/uitstoot/{id}', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
@@ -48,6 +53,9 @@ Route::get('/agenda/delete/{id}', [AgendaController::class, 'delete'])->name('ag
 Route::post('/agenda/edit/time', [AgendaController::class, 'editTime'])->name('agenda.edit.time');
 
 
+
+Route::get('/persoonlijkeUitstoot', [PersonalEmissions::class, 'personalEmissions'])->name('personal-emissions');
+Route::post('/uitstootOpslaan', [PersonalEmissions::class, 'updateEmissions'])->name('update.personal-emissions');
 Route::post('/berichten', [ChatController::class, 'store']);
 Route::post('/berichten-create', [ChatController::class, 'create']);
 Route::post('/berichten-update/{id}', [ChatController::class, 'update']);

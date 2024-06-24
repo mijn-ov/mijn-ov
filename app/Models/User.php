@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'car_emissions',
+        'ov_emissions',
     ];
 
     /**

@@ -110,7 +110,7 @@ function init() {
     }
 }
 
-function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation) {
+function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation, parent) {
     //div + div header
     let routePartial = document.createElement('div');
     routePartial.classList.add('route-partial');
@@ -149,13 +149,26 @@ function createRouteMessage(legTransitName, legDuration, legCategory, originTrac
     rightSideDiv.append(stationPerronA)
     rightSideDiv.append(stationNameA)
     routePartial.append(rightSideDiv)
-
-    messageArea.append(routePartial);
+    let imgHoldDiv = document.createElement('div');
+    imgHoldDiv.classList.add('legTypeIcon');
+    let newImg = document.createElement('img');
+    if (legCategory === 'Trein') {
+        newImg.src = './img/icons/r_trein.svg'
+    } else if (legCategory === 'Bus') {
+        newImg.src = './img/icons/r_bus.svg'
+    } else {
+        newImg.src = './img/icons/r_tram.svg'
+    }
+    imgHoldDiv.append(newImg)
+    routePartial.append(imgHoldDiv);
+    parent.append(routePartial);
 }
 
-function createWalkBubble(walkInstructionsText, distance, legDuration) {
+function createWalkBubble(walkInstructionsText, distance, legDuration, parent) {
+
     let routePartial = document.createElement('div');
     routePartial.classList.add('route-partial');
+    routePartial.classList.add('route')
     let walkInstructions = document.createElement('p');
     walkInstructions.textContent = walkInstructionsText;
     routePartial.append(walkInstructions)
@@ -169,7 +182,7 @@ function createWalkBubble(walkInstructionsText, distance, legDuration) {
     legHeader.append(transportType);
     routePartial.append(legHeader);
 
-    messageArea.append(routePartial)
+    parent.append(routePartial)
 }
 
 function createExplanation() {
@@ -351,12 +364,10 @@ async function receiveMessage(data) {
     console.log(data);
 
     try {
+
+        const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
         const proxyUrl = 'https://api.allorigins.win/get?url=';
-        let endpoint;
-
-        endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
-
-        console.log(endpoint)
+        const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&alternatives=true&mode=transit&key=${apiKey}&language=nl`;
 
         const response = await fetch(proxyUrl + encodeURIComponent(endpoint));
         if (!response.ok) {
@@ -365,10 +376,57 @@ async function receiveMessage(data) {
 
         const data = await response.json();
         const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
-
+        console.log(apiResponse);
         if (apiResponse.status !== 'OK') {
             throw new Error(`API Error: ${apiResponse.status}`);
         }
+        console.log(apiResponse);
+        let setRouteObject = document.getElementById('emissionsRoute');
+        let setRouteStatus = document.getElementById('routeObject');
+        setRouteStatus.value = [`${apiResponse.routes[0].legs[0].start_address} ^ ${apiResponse.routes[0].legs[0].end_address}`];
+        setRouteObject.value = apiResponse;
+        console.log(setRouteStatus.value);
+        let parentDiv = document.createElement('div');
+        parentDiv.classList.add('route');
+        for (let leg of apiResponse.routes[0].legs[0].steps) {
+            if (leg.travel_mode !== "WALKING") {
+                let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
+                let legDuration = leg.duration.text;
+                let legCategory = leg.transit_details.line.vehicle.name;
+                let originTrack = leg.transit_details.departure_stop.name;
+                let destinationTrack = leg.transit_details.arrival_stop.name;
+                let imgHoldDiv = document.createElement('div');
+                let departureTime = null;
+                let arrivalTime = null;
+                console.log(originTrack, destinationTrack);
+                createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack, parentDiv
+                )
+                ;
+
+            } else {
+                createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text, parentDiv)
+            }
+        }
+        let arrivalTDiv = document.createElement('div')
+        arrivalTDiv.classList.add('arrivalT');
+        let arrivalText = document.createElement('p');
+        arrivalText.innerHTML = apiResponse.routes[0].legs[0].arrival_time.text;
+        arrivalText.classList.add('arrivalText');
+        arrivalTDiv.append(arrivalText);
+
+        let departureTDiv = document.createElement('div')
+        departureTDiv.classList.add('departureT');
+        let departureText = document.createElement('p');
+        departureText.innerHTML = apiResponse.routes[0].legs[0].departure_time.text;
+        departureText.classList.add('departureText')
+        departureTDiv.append(departureText)
+        parentDiv.append(arrivalTDiv);
+        parentDiv.append(departureTDiv)
+            messageArea.append(parentDiv)
+        document.getElementById("trip_name").value = `${jsonResponse.origin} -> ${jsonResponse.destination}`;
+        document.getElementById("trip_url").value = proxyUrl + encodeURIComponent(endpoint);
+        console.log(document.getElementById('trip_url').value);
+
 
         let newMessage2 = {
             agent: 'bot',
@@ -379,6 +437,7 @@ async function receiveMessage(data) {
             await uploadMessages(newMessage2, JSON.stringify(apiResponse), chatID);
         }
         createRoute(apiResponse, jsonResponse);
+
 
 
         messages.push(newMessage);
