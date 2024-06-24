@@ -74,7 +74,7 @@ html{
         <div
             style="display: flex; flex-direction: row; color: #464646; justify-content: space-between; align-items: center">
             <div><p style="font-weight: 800; color: #484848;">OV:</p>
-                <p style="transform: translateY(-5px)">{{round($ovEmissions/1000)}}Kg Co2</p></div>
+                <p style="transform: translateY(-5px)">{{round((int) $ovEmissions / 1000)}}Kg Co2</p></div>
             <p>></p>
             <div><p style="font-weight: 800; color: #484848;">Auto:</p>
                 <p id="carEmissions" style="transform: translateY(-5px)"></p></div>

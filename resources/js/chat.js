@@ -43,10 +43,6 @@ function init() {
     mapButton = document.getElementById('map-button');
     agendaButton = document.getElementById('agenda-button');
 
-    emmisionsButton.addEventListener('click', function () {
-        console.log(chatID)
-        window.location.href = `/uitstoot/${chatID}`;
-    })
 
     mapButton.addEventListener('click', function () {
         console.log(chatID)
@@ -153,11 +149,11 @@ function createRouteMessage(legTransitName, legDuration, legCategory, originTrac
     imgHoldDiv.classList.add('legTypeIcon');
     let newImg = document.createElement('img');
     if (legCategory === 'Trein') {
-        newImg.src = './img/icons/r_trein.svg'
+        newImg.src = '../img/icons/r_trein.svg'
     } else if (legCategory === 'Bus') {
-        newImg.src = './img/icons/r_bus.svg'
+        newImg.src = '../img/icons/r_bus.svg'
     } else {
-        newImg.src = './img/icons/r_tram.svg'
+        newImg.src = '../img/icons/r_tram.svg'
     }
     imgHoldDiv.append(newImg)
     routePartial.append(imgHoldDiv);
@@ -376,6 +372,16 @@ async function receiveMessage(data) {
 
         const data = await response.json();
         const apiResponse = JSON.parse(data.contents); // Parse the contents field to get the actual API response
+
+        let newMessage2 = {
+            agent: 'bot',
+            message: null,
+        };
+
+        if (chatID) {
+            await uploadMessages(newMessage2, JSON.stringify(apiResponse), chatID);
+        }
+
         console.log(apiResponse);
         if (apiResponse.status !== 'OK') {
             throw new Error(`API Error: ${apiResponse.status}`);
@@ -428,17 +434,7 @@ async function receiveMessage(data) {
         console.log(document.getElementById('trip_url').value);
 
 
-        let newMessage2 = {
-            agent: 'bot',
-            message: null,
-        };
-
-        if (chatID) {
-            await uploadMessages(newMessage2, JSON.stringify(apiResponse), chatID);
-        }
         createRoute(apiResponse, jsonResponse);
-
-
 
         messages.push(newMessage);
         console.log(messages);
@@ -467,6 +463,9 @@ function createRoute(apiResponse, jsonResponse) {
     let mapInfoPoints = [];
     const proxyUrl = 'https://api.allorigins.win/get?url=';
     let endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
+    let parentDiv = document.createElement('div');
+    parentDiv.classList.add('route');
+
     for (let leg of apiResponse.routes[0].legs[0].steps) {
         if (leg.travel_mode !== "WALKING") {
             let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
@@ -478,9 +477,9 @@ function createRoute(apiResponse, jsonResponse) {
 
             // Push origin and destination points to their respective arrays
             mapInfoPoints.push(mapInfo);
-            createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack);
+            createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack, parentDiv);
         } else {
-            createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text);
+            createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text, parentDiv);
         }
     }
 
