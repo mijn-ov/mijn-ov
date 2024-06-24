@@ -131,6 +131,36 @@ nav {
     border-radius: 10px 10px 10px 0px;
 }
 
+.chat-explanation {
+    padding: 7px;
+    color: var(--ov-magenta);
+    text-align: left;
+    width: 100%;
+}
+
+.chat-explanation a {
+    text-decoration: 1px solid underline;
+}
+
+h1 {
+    color: var(--ov-magenta);
+    font-weight: bolder;
+    font-size: calc(15pt + 1vw);
+}
+
+h3 {
+    color: var(--ov-magenta);
+    font-weight: bold;
+}
+
+.text {
+    color: var(--ov-magenta);
+}
+
+.ov-info-explanation {
+    width: 70%;
+}
+
 .d-none {
     display: none;
 }
@@ -177,7 +207,7 @@ nav {
 
 
 .route-partial{
-    width: 80vw;
+    width: 80%;
     background-color: var(--ov-magenta);
     position: relative;
     margin: 20px 0;

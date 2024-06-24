@@ -29,6 +29,8 @@ Route::get('/uitstoot/{id}', [ChatController::class, 'viewEmissions'])->name('ch
 
 Route::get('/map/{id}', [ChatController::class, 'viewMap'])->name('chat.map');
 
+Route::get('/verklaring/{id}', [ChatController::class, 'viewExplanation'])->name('chat.view-explanation');
+
 Route::post('/berichten', [ChatController::class, 'store']);
 Route::post('/berichten-create', [ChatController::class, 'create']);
 Route::post('/berichten-update/{id}', [ChatController::class, 'update']);
