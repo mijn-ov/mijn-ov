@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\EmissionsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FavoriteController;
+use App\http\Controllers\PersonalEmissions;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,8 +24,10 @@ Route::get('/favorieten', [FavoriteController::class, 'viewFavorites'])->name('f
 Route::post('/saveFavoriet', [FavoriteController::class, 'store'])->name('favorite.store');
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
 
-Route::get('/uitstoot', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
+Route::post('/uitstoot', [EmissionsController::class, 'viewEmissions'])->name('chat.emissions');
 
+Route::get('/persoonlijkeUitstoot', [PersonalEmissions::class, 'personalEmissions'])->name('personal-emissions');
+Route::post('/uitstootOpslaan', [PersonalEmissions::class, 'updateEmissions'])->name('update.personal-emissions');
 Route::post('/berichten', [ChatController::class, 'store']);
 
 Route::middleware('auth')->group(function () {

@@ -26,7 +26,7 @@
         @yield('content')
     </main>
 
-    <nav class="absolute bg-white bottom-0 h-16 rounded w-full">
+    <nav class="fixed bg-white bottom-0 h-16 rounded w-full">
         <div class="flex flex-row justify-evenly items-center h-full">
             <a href="#" class="scale-125">
                 <svg class="fill-ov-purple hover:fill-ov-orange transition ease-in" width="18" height="18"

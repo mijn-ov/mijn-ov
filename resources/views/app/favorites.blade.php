@@ -52,7 +52,6 @@
                 parent.style.marginBottom = `-${parent.offsetHeight}`;
                 parent.style.transform = "translateY(-100%)";
                 parent.style.opacity = "0";
-
             } else {
                 openedArrayCheck[`${parentDivID}`] = true;
                 let parent = document.getElementById(`${parentDivID}`);
@@ -164,6 +163,7 @@
             <div class="route-partial"><p>Loop naar Amsterdam Centraal</p>
                 <div class="leg-header"><p>0,2 km ● 1 min</p>
                     <p>Lopen</p></div>
+                <div class="legTypeIcon"><img src="{{ asset('img/icons/walk.svg') }}"></div>
             </div>
             <div class="route-partial">
                 <div class="leg-header"><p>Trein Rotterdam Centraal ● 43 min</p>
@@ -177,7 +177,6 @@
             <div class="route-partial"><p>Loop naar Rotterdam, Henegouwerplein</p>
                 <div class="leg-header"><p>0,6 km ● 8 min</p>
                     <p>Lopen</p></div>
-
             </div>
             <div class="route-partial">
                 <div class="leg-header"><p>Bus Station Schiedam Centrum ● 14 min</p>
@@ -187,6 +186,7 @@
                 <img src="img/arrow-right.svg" class="arrowImg">
                 <div><p class="station">Afstap:</p>
                     <p>Schiedam, Station Schiedam Centrum</p></div>
+                <div class="legTypeIcon"><img src="{{ asset('img/icons/r_bus.svg') }}"></div>
             </div>
         </div>
     </div>
