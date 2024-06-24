@@ -17,5 +17,7 @@
     },
     "dependencies": {
         "progressbar.js": "^1.1.1"
+        "dotenv": "^16.4.5",
+        "leaflet-routing-machine": "^3.2.12"
     }
 }

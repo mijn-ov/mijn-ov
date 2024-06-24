@@ -43,7 +43,7 @@
             </div>
         </div>
 
-        <div class="help-box flex flex-row justify-between items-center p-3" style="transform: translateY(-8px)">
+        <div class="help-box flex flex-row justify-between items-center p-3" style="transform: translateY(-48px)">
             <div class="flex flex-row gap-4">
                 <a class="btn-outline-stylish" href="{{ route('chat') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"

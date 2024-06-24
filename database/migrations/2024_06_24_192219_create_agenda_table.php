@@ -11,22 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('histories', function (Blueprint $table) {
+        Schema::create('agendas', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('title')->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->string('day');
+            $table->string('time');
+            $table->string('start_address');
+            $table->string('end_address');
+            $table->string('duration');
+            $table->boolean('travel_type');
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('history');
+        Schema::dropIfExists('agenda');
     }
 };

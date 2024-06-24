@@ -157,6 +157,7 @@
             <div id="{{$favorite->id}}" style="z-index: 30; transform: translateY(-100%); opacity: 0"
                  class="trip"></div>
         @endforeach
+
         <div id="200"
              style="z-index: 30; transform: translateY(0px); opacity: 1; margin-bottom: 0px; transition: all 700ms ease-in-out 700ms;"
              class="route">
