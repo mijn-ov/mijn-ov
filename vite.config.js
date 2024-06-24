@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/js/emissions.js',
                 'resources/js/favorites.js',
                 'resources/js/map.js',
+                'resources/js/agenda.js',
 
             ],
             refresh: true,

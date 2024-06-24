@@ -24,6 +24,7 @@ let chatID;
 
 let emmisionsButton;
 let mapButton;
+let agendaButton;
 
 const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
 
@@ -40,6 +41,7 @@ function init() {
 
     emmisionsButton = document.getElementById('emmisions-button');
     mapButton = document.getElementById('map-button');
+    agendaButton = document.getElementById('agenda-button');
 
     emmisionsButton.addEventListener('click', function () {
         console.log(chatID)
@@ -49,6 +51,11 @@ function init() {
     mapButton.addEventListener('click', function () {
         console.log(chatID)
         window.location.href = `/map/${chatID}`;
+    })
+
+    agendaButton.addEventListener('click', function () {
+        console.log(chatID)
+        window.location.href = `/agenda/toevoegen/${chatID}`;
     })
 
 

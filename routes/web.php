@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FavoriteController;
@@ -30,6 +31,12 @@ Route::get('/uitstoot/{id}', [ChatController::class, 'viewEmissions'])->name('ch
 Route::get('/map/{id}', [ChatController::class, 'viewMap'])->name('chat.map');
 
 Route::get('/verklaring/{id}', [ChatController::class, 'viewExplanation'])->name('chat.view-explanation');
+
+Route::get('/agenda/toevoegen/{id}', [ChatController::class, 'viewAgenda'])->name('chat.agenda');
+Route::post('/agenda/toevoegen', [ChatController::class, 'addToAgenda'])->name('chat.agenda.add');
+
+Route::get('/agenda', [AgendaController::class, 'redirect'])->name('agenda');
+Route::get('/agenda/{day}', [AgendaController::class, 'view'])->name('agenda.view');
 
 Route::post('/berichten', [ChatController::class, 'store']);
 Route::post('/berichten-create', [ChatController::class, 'create']);

@@ -148,6 +148,12 @@ h1 {
     font-size: calc(15pt + 1vw);
 }
 
+h2 {
+    color: var(--ov-magenta);
+    font-weight: bolder;
+    font-size: calc(12pt + 1vw);
+}
+
 h3 {
     color: var(--ov-magenta);
     font-weight: bold;
@@ -314,6 +320,50 @@ h3 {
     user-select: none;
 }
 
+select {
+    border-radius: 5px;
+    width: 100%;
+    overflow: scroll;
+    border: none;
+}
+
+.agenda {
+    background-color: white;
+    height: 80vh;
+    width: 100%;
+    margin-top: 10px;
+    overflow-y: scroll;
+}
+
+.hour {
+    height: 60px;
+    padding: 5px;
+    border-bottom: 2px solid rgba(241, 141, 26, 0.26);
+}
+
+.agenda-entry {
+    background-color: var(--ov-magenta);
+    padding: 5px;
+    border-radius: 5px;
+    color: #fff;
+    width: 75%;
+    margin: 0 auto;
+}
+
+.form-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.form-element {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
 .settings-item svg {
     padding: 10px;
 }
@@ -414,6 +464,7 @@ h3 {
 }
 
 textarea:focus,
+select:focus,
 input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="datetime"]:focus,
@@ -441,4 +492,35 @@ textarea, input, .uneditable-input {
     transition: 0.1s;
     outline-offset: -1px;
     outline: rgba(0, 0, 0, 0) 1.5px solid;
+}
+
+.popup {
+    backdrop-filter: blur(3px) brightness(50%);
+    background: rgba(0, 0, 0, 0.41);
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column !important;
+    width: 100%;
+    align-items: center;
+}
+
+.popup-body {
+    background-color: white;
+    width: 90vw;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 25px 10px;
 }
