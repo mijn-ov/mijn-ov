@@ -70,6 +70,7 @@ function init() {
 
     if (chatHistoryData) {
         console.log(chatHistoryData)
+            chatID = chatHistoryData[0].history_id
         try {
 
             chatHistoryData.forEach(history => {
@@ -95,9 +96,6 @@ function init() {
             openHelpBox()
             appSplash.remove()
 
-            firstChat = false;
-
-            chatID = chatHistoryData[0].history_id
             console.log(chatID)
         } catch (error) {
             console.error('Error parsing chat history data:', error);
@@ -106,11 +104,6 @@ function init() {
 }
 
 function createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originStation, destinationTrack, destinationStation) {
-    if (firstChat) {
-        openHelpBox();
-    }
-    firstChat = false
-
     //div + div header
     let routePartial = document.createElement('div');
     routePartial.classList.add('route-partial');
@@ -172,6 +165,13 @@ function createWalkBubble(walkInstructionsText, distance, legDuration) {
     messageArea.append(routePartial)
 }
 
+function createExplanation() {
+    let explanation = document.createElement('div');
+    explanation.classList.add('chat-explanation');
+    explanation.innerHTML = `Informatie kan soms afwijkend zijn · <a href="/verklaring/${chatID}">Bekijk waarop dit gebaseerd is</a>`;
+    messageArea.appendChild(explanation);
+}
+
 function createUserBubble(text) {
     let chatBubble = document.createElement('div');
     chatBubble.classList.add('chat-bubble-user');
@@ -186,7 +186,6 @@ function createUserBubble(text) {
 }
 
 function createBotBubble(text) {
-
     let chatBubble = document.createElement('div');
     chatBubble.classList.add('chat-bubble-bot');
     chatBubble.innerText = text;
@@ -196,6 +195,14 @@ function createBotBubble(text) {
     chatBubble.style.transform = 'translateX(calc(-50vw + 25px + ' + elementWidth / 2 + 'px))';
 
     botBubbles.push(chatBubble)
+
+    console.log(firstChat)
+
+    if (firstChat) {
+        createExplanation()
+        openHelpBox();
+    }
+    firstChat = false
 }
 
 function updateTransform() {

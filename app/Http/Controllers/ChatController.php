@@ -62,6 +62,15 @@ class ChatController extends Controller
         return view('app.map', ['id' => $id]);
     }
 
+    public function viewExplanation($id)
+    {
+        $data = Message::where('history_id', $id)
+            ->whereNotNull('data')
+            ->get();
+
+        return view('app.explanation', ['id' => $id, 'data' => $data]);
+    }
+
     public function submitMessage()
     {
         // Get the JSON data from the request body
