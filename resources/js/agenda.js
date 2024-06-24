@@ -35,7 +35,7 @@ function init() {
 
             day = tripData.day
 
-            openPopUp()
+            openPopUp(tripData)
             getRoute(tripData)
         });
     });
@@ -153,6 +153,8 @@ async function getRoute(tripData) {
 
         console.log(apiResponse.routes)
 
+        updateAgenda(apiResponse, tripData)
+
         if (apiResponse.routes) {
             createRoute(apiResponse); // Pass the route object to createRoute function
         } else {
@@ -223,7 +225,6 @@ function createRoute(apiResponse) {
     info.innerHTML = `Vertrek: ${apiResponse.routes[0].legs[0].departure_time.text}, Aankomst ${apiResponse.routes[0].legs[0].arrival_time.text} | ${apiResponse.routes[0].legs[0].duration.text},`
     popUpContent.appendChild(info)
 
-
     for (let leg of apiResponse.routes[0].legs[0].steps) {
         if (leg.travel_mode !== "WALKING") {
             let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
@@ -244,7 +245,42 @@ function createRoute(apiResponse) {
     }
 }
 
-function openPopUp() {
+async function updateAgenda(apiResponse, tripData) {
+    let body = {
+        id: tripData.id,
+        duration: apiResponse.routes[0].legs[0].duration.text,
+        departure_time: apiResponse.routes[0].legs[0].departure_time.text,
+        arrival_time: apiResponse.routes[0].legs[0].arrival_time.text
+    };
+
+    console.log("Request Body:", body);
+
+    try {
+        const response = await fetch('/agenda/edit/time', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log('Response from server:', data); // Log the response data
+
+        // Optionally handle the response data here
+
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+
+function openPopUp(data) {
     popUp = document.createElement('div');
     popUp.classList.add('popup')
     body.appendChild(popUp)
@@ -271,8 +307,26 @@ function openPopUp() {
     cancelButton.innerText = 'Oke'
     buttonContainer.appendChild(cancelButton)
 
+    let editButton = document.createElement('a')
+    editButton.classList.add('btn-outline')
+    editButton.innerText = 'Bewerken'
+    buttonContainer.appendChild(editButton)
+
+    let deleteButton = document.createElement('a')
+    deleteButton.classList.add('btn-outline')
+    deleteButton.innerText = 'Verwijderen'
+    buttonContainer.appendChild(deleteButton)
 
     cancelButton.addEventListener('click', () => {
+        window.location.reload(); // Refresh the page
         popUp.remove();
+    });
+
+    editButton.addEventListener('click', () => {
+        window.location.href = `/agenda/bewerk/${data.id}`;
+    });
+
+    editButton.addEventListener('click', () => {
+        window.location.href = `/agenda/delete/${data.id}`;
     });
 }

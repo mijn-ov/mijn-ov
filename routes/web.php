@@ -38,6 +38,16 @@ Route::post('/agenda/toevoegen', [ChatController::class, 'addToAgenda'])->name('
 Route::get('/agenda', [AgendaController::class, 'redirect'])->name('agenda');
 Route::get('/agenda/{day}', [AgendaController::class, 'view'])->name('agenda.view');
 
+Route::get('/agenda/maak/nieuw', [AgendaController::class, 'create'])->name('agenda.create');
+Route::post('/agenda/maak/nieuw', [AgendaController::class, 'createSave'])->name('agenda.create.save');
+
+Route::get('/agenda/bewerk/{id}', [AgendaController::class, 'edit'])->name('agenda.edit');
+Route::post('/agenda/bewerk/{id}', [AgendaController::class, 'save'])->name('agenda.edit.save');
+Route::get('/agenda/delete/{id}', [AgendaController::class, 'delete'])->name('agenda.delete');
+
+Route::post('/agenda/edit/time', [AgendaController::class, 'editTime'])->name('agenda.edit.time');
+
+
 Route::post('/berichten', [ChatController::class, 'store']);
 Route::post('/berichten-create', [ChatController::class, 'create']);
 Route::post('/berichten-update/{id}', [ChatController::class, 'update']);
