@@ -7,6 +7,11 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/bootstrap.js',
+                'resources/js/chat.js',
+                'resources/js/emissions.js',
+                'resources/js/favorites.js',
+                'resources/js/map.js',
 
             ],
             refresh: true,
