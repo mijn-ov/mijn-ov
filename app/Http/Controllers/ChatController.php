@@ -117,7 +117,7 @@ class ChatController extends Controller
             $agenda->travel_type = $request->input('travel_type');;
             $agenda->save();
 
-            return redirect(route('agenda.view'));
+            return redirect(route('agenda.view', strtolower($agenda->day)));
         } else {
             return response()->json(['error' => 'Invalid trip format'], 400);
         }

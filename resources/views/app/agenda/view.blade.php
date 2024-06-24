@@ -8,6 +8,10 @@
              style="height: 90vh; width: 100vw; overflow-y: scroll; align-items: center; display: flex; flex-direction: column">
             <h1 class="text-center">Agenda</h1>
 
+            <a id="add" href="{{ route('agenda.create') }}">
+                +
+            </a>
+
             <div class="flex flex-row justify-between w-full items-center">
                 <a id="back" class="btn "><</a>
                 <h3>{{$day}}</h3>
