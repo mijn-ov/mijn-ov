@@ -326,7 +326,7 @@ function openPopUp(data) {
         window.location.href = `/agenda/bewerk/${data.id}`;
     });
 
-    editButton.addEventListener('click', () => {
+    deleteButton.addEventListener('click', () => {
         window.location.href = `/agenda/delete/${data.id}`;
     });
 }

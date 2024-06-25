@@ -7,6 +7,7 @@
         <div class="p-5" style="height: 90vh; overflow-y: scroll">
             <h1>Waar we ons advies op gebaseerd hebben:</h1>
 
+            @if(isset($route['routes'][0]))
             <div class="flex md:flex-row flex-col gap-5">
                 <div>
                     <div>
@@ -51,12 +52,16 @@
                     @endforeach
                 </div>
             </div>
-
+            @endif
+            @if(isset($route['routes'][0]))
             <p class="text mt-10 font-bold">Mijn OV kan je berichten verkeerd begrijpen! Controleer altijd of de juiste stations
                 en
                 tijden hierboven
                 zijn
                 aangegeven!</p>
+            @else
+                <p class="text mt-10 font-bold">Mijn OV kan je berichten verkeerd begrijpen! Controleer altijd de gegevens die MijnOV vermeld!</p>
+            @endif
 
             <div class="mt-10">
                 <p class="text-ov-orange font-extrabold">Informatie via:</p>
