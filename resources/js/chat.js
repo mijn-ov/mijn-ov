@@ -58,6 +58,8 @@ function init() {
     chatForum.addEventListener('submit', function (e) {
         e.preventDefault();
 
+        console.log('test')
+
         if (chatInput.value !== '') {
             submitChat();
         }
@@ -73,7 +75,7 @@ function init() {
 
     if (chatHistoryData) {
         console.log(chatHistoryData)
-            chatID = chatHistoryData[0].history_id
+        chatID = chatHistoryData[0].history_id
         try {
 
             chatHistoryData.forEach(history => {
@@ -132,7 +134,7 @@ function createRouteMessage(legTransitName, legDuration, legCategory, originTrac
     routePartial.append(leftSideDiv)
 
     let arrowImg = document.createElement('img');
-    arrowImg.src = 'img/arrow-right.svg';
+    arrowImg.src = '../img/arrow-right.svg';
     arrowImg.classList.add('arrowImg');
     routePartial.append(arrowImg);
 
@@ -360,7 +362,6 @@ async function receiveMessage(data) {
     console.log(data);
 
     try {
-
         const apiKey = 'AIzaSyCnrZkJw8-k4KJRMFSk7jdIQ7tUYNqvGYY';
         const proxyUrl = 'https://api.allorigins.win/get?url=';
         const endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&alternatives=true&mode=transit&key=${apiKey}&language=nl`;
@@ -392,8 +393,44 @@ async function receiveMessage(data) {
         setRouteStatus.value = [`${apiResponse.routes[0].legs[0].start_address} ^ ${apiResponse.routes[0].legs[0].end_address}`];
         setRouteObject.value = apiResponse;
         console.log(setRouteStatus.value);
+
         let parentDiv = document.createElement('div');
         parentDiv.classList.add('route');
+
+        createRoute(apiResponse, jsonResponse);
+
+        messages.push(newMessage);
+        console.log(messages);
+
+        messageArea.scrollTop = messageArea.scrollHeight;
+    } catch (error) {
+
+        let errorMessage = 'Er is helaas iets misgegaan. Probeer je vraag nog een keer te stellen of kom later terug!'
+
+        createBotBubble(errorMessage)
+
+        if (chatID) {
+            let newMessage = {
+                agent: 'bot',
+                message: errorMessage,
+            };
+
+            await uploadMessages(newMessage, null, chatID);
+        }
+        console.error('Error fetching directions:', error);
+    }
+}
+
+
+function createRoute(apiResponse, jsonResponse) {
+    let mapInfoPoints = [];
+    const proxyUrl = 'https://api.allorigins.win/get?url=';
+    let endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
+    let parentDiv = document.createElement('div');
+    parentDiv.classList.add('route');
+    messageArea.appendChild(parentDiv)
+
+    if (apiResponse.routes[0]) {
         for (let leg of apiResponse.routes[0].legs[0].steps) {
             if (leg.travel_mode !== "WALKING") {
                 let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
@@ -428,65 +465,11 @@ async function receiveMessage(data) {
         departureTDiv.append(departureText)
         parentDiv.append(arrivalTDiv);
         parentDiv.append(departureTDiv)
-            messageArea.append(parentDiv)
+        messageArea.append(parentDiv)
         document.getElementById("trip_name").value = `${jsonResponse.origin} -> ${jsonResponse.destination}`;
         document.getElementById("trip_url").value = proxyUrl + encodeURIComponent(endpoint);
         console.log(document.getElementById('trip_url').value);
-
-
-        createRoute(apiResponse, jsonResponse);
-
-        messages.push(newMessage);
-        console.log(messages);
-
-        messageArea.scrollTop = messageArea.scrollHeight;
-    } catch (error) {
-
-        let errorMessage = 'Er is helaas iets misgegaan. Probeer je vraag nog een keer te stellen of kom later terug!'
-
-        createBotBubble(errorMessage)
-
-        if (chatID) {
-            let newMessage = {
-                agent: 'bot',
-                message: errorMessage,
-            };
-
-            await uploadMessages(newMessage, null, chatID);
-        }
-        console.error('Error fetching directions:', error);
     }
-}
-
-
-function createRoute(apiResponse, jsonResponse) {
-    let mapInfoPoints = [];
-    const proxyUrl = 'https://api.allorigins.win/get?url=';
-    let endpoint = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(jsonResponse.origin)}&destination=${encodeURIComponent(jsonResponse.destination)}&mode=transit&key=${apiKey}&language=nl`;
-    let parentDiv = document.createElement('div');
-    parentDiv.classList.add('route');
-
-    for (let leg of apiResponse.routes[0].legs[0].steps) {
-        if (leg.travel_mode !== "WALKING") {
-            let legTransitName = `${leg.transit_details.line.vehicle.name} ${leg.transit_details.headsign}`;
-            let legDuration = leg.duration.text;
-            let legCategory = leg.transit_details.line.vehicle.name;
-            let originTrack = leg.transit_details.departure_stop.name;
-            let destinationTrack = leg.transit_details.arrival_stop.name;
-            let mapInfo = leg;
-
-            // Push origin and destination points to their respective arrays
-            mapInfoPoints.push(mapInfo);
-            createRouteMessage(legTransitName, legDuration, legCategory, originTrack, originTrack, destinationTrack, destinationTrack, parentDiv);
-        } else {
-            createWalkBubble(leg.html_instructions, leg.distance.text, leg.duration.text, parentDiv);
-        }
-    }
-
-    document.getElementById("trip_name").value = `${jsonResponse.origin} -> ${jsonResponse.destination}`;
-    document.getElementById("trip_url").value = proxyUrl + encodeURIComponent(endpoint);
-    console.log(document.getElementById('trip_url').value);
-    localStorage.setItem('mapInfoPoints', JSON.stringify(mapInfoPoints));
 }
 
 async function createHistory(title) {

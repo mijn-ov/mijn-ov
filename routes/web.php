@@ -22,20 +22,22 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ChatController::class, 'viewChat'])->name('chat');
 Route::get('/chat/{id}', [ChatController::class, 'loadHistory'])->name('chat.history');
 
-
-Route::get('/favorieten', [FavoriteController::class, 'viewFavorites'])->name('favorites');
-Route::post('/saveFavoriet', [FavoriteController::class, 'store'])->name('favorite.store');
+Route::post('/berichten', [ChatController::class, 'store']);
+Route::post('/berichten-create', [ChatController::class, 'create']);
+Route::post('/berichten-update/{id}', [ChatController::class, 'update']);
 
 Route::post('/submit-message', [ChatController::class, 'submitMessage'])->name('chat.submit');
 
-
 Route::post('/uitstoot', [EmissionsController::class, 'viewEmissions'])->name('chat.emissions');
-
-//Route::get('/uitstoot/{id}', [ChatController::class, 'viewEmissions'])->name('chat.emissions');
 
 Route::get('/map/{id}', [ChatController::class, 'viewMap'])->name('chat.map');
 
+
 Route::get('/verklaring/{id}', [ChatController::class, 'viewExplanation'])->name('chat.view-explanation');
+
+Route::middleware('auth')->group(function () {
+Route::get('/favorieten', [FavoriteController::class, 'viewFavorites'])->name('favorites');
+Route::post('/saveFavoriet', [FavoriteController::class, 'store'])->name('favorite.store');
 
 Route::get('/agenda/toevoegen/{id}', [ChatController::class, 'viewAgenda'])->name('chat.agenda');
 Route::post('/agenda/toevoegen', [ChatController::class, 'addToAgenda'])->name('chat.agenda.add');
@@ -56,11 +58,7 @@ Route::post('/agenda/edit/time', [AgendaController::class, 'editTime'])->name('a
 
 Route::get('/persoonlijkeUitstoot', [PersonalEmissions::class, 'personalEmissions'])->name('personal-emissions');
 Route::post('/uitstootOpslaan', [PersonalEmissions::class, 'updateEmissions'])->name('update.personal-emissions');
-Route::post('/berichten', [ChatController::class, 'store']);
-Route::post('/berichten-create', [ChatController::class, 'create']);
-Route::post('/berichten-update/{id}', [ChatController::class, 'update']);
 
-Route::middleware('auth')->group(function () {
     Route::get('/geschiedenis', [ProfileController::class, 'history'])->name('profile.history');
 
     Route::get('/profiel', [ProfileController::class, 'view'])->name('profile');
